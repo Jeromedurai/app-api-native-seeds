@@ -40,6 +40,37 @@
             public const string SP_PRODUCT_CATEGORY_MAPPING = "[dbo].[SP_PRODUCT_CATEGORY_MAPPING]";
             public const string SP_UPSERT_WISHLIST = "[dbo].[SP_UPSERT_WISHLIST]";
             public const string SP_UPSERT_CART = "[dbo].[SP_UPSERT_CART]";
+            public const string SP_GET_VALUE_BY_KEY = "xc_get_app_config_by_key";
+            public const string SP_SEARCH_PRODUCTS = "[dbo].[SP_SEARCH_PRODUCTS]";
+            public const string SP_GET_PRODUCT_BY_ID = "[dbo].[SP_GET_PRODUCT_BY_ID]";
+            public const string SP_ADD_PRODUCT = "[dbo].[SP_ADD_PRODUCT]";
+            public const string SP_UPDATE_PRODUCT = "[dbo].[SP_UPDATE_PRODUCT]";
+            public const string SP_DELETE_PRODUCT = "[dbo].[SP_DELETE_PRODUCT]";
+            public const string SP_GET_ALL_CATEGORIES = "[dbo].[SP_GET_ALL_CATEGORIES]";
+            public const string SP_ADD_CATEGORY = "[dbo].[SP_ADD_CATEGORY]";
+            public const string SP_UPDATE_CATEGORY = "[dbo].[SP_UPDATE_CATEGORY]";
+            public const string SP_GET_MENU_MASTER = "[dbo].[SP_GET_MENU_MASTER]";
+            public const string SP_USER_LOGIN = "[dbo].[SP_USER_LOGIN]";
+            public const string SP_USER_REGISTER = "[dbo].[SP_USER_REGISTER]";
+            public const string SP_USER_LOGOUT = "[dbo].[SP_USER_LOGOUT]";
+            public const string SP_GET_USER_PROFILE = "[dbo].[SP_GET_USER_PROFILE]";
+            public const string SP_UPDATE_USER_PROFILE = "[dbo].[SP_UPDATE_USER_PROFILE]";
+            public const string SP_RESET_PASSWORD = "[dbo].[SP_RESET_PASSWORD]";
+            public const string SP_GET_USER_CART = "[dbo].[SP_GET_USER_CART]";
+            public const string SP_ADD_ITEM_TO_CART = "[dbo].[SP_ADD_ITEM_TO_CART]";
+            public const string SP_REMOVE_ITEM_FROM_CART = "[dbo].[SP_REMOVE_ITEM_FROM_CART]";
+            public const string SP_CLEAR_CART = "[dbo].[SP_CLEAR_CART]";
+            public const string SP_CREATE_ORDER = "[dbo].[SP_CREATE_ORDER]";
+            public const string SP_GET_ORDERS = "[dbo].[SP_GET_ORDERS]";
+            public const string SP_GET_ORDER_BY_ID = "[dbo].[SP_GET_ORDER_BY_ID]";
+            public const string SP_CANCEL_ORDER = "[dbo].[SP_CANCEL_ORDER]";
+            public const string SP_UPDATE_ORDER_STATUS = "[dbo].[SP_UPDATE_ORDER_STATUS]";
+            public const string SP_ADMIN_GET_ALL_USERS = "[dbo].[SP_ADMIN_GET_ALL_USERS]";
+            public const string SP_ADMIN_UPDATE_USER_ROLE = "[dbo].[SP_ADMIN_UPDATE_USER_ROLE]";
+            public const string SP_ADMIN_GET_ALL_ORDERS = "[dbo].[SP_ADMIN_GET_ALL_ORDERS]";
+            public const string SP_ADD_PRODUCT_IMAGES = "[dbo].[SP_ADD_PRODUCT_IMAGES]";
+            public const string SP_UPDATE_PRODUCT_IMAGE = "[dbo].[SP_UPDATE_PRODUCT_IMAGE]";
+            public const string SP_DELETE_PRODUCT_IMAGE = "[dbo].[SP_DELETE_PRODUCT_IMAGE]";
         }
 
         public static class AddressType

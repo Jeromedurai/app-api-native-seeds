@@ -17,7 +17,7 @@ namespace Tenant.Query.Controllers.Authentication
     public class AuthenticationController : TnBaseController<Service.Authentication.AuthenticationService>
     {
         public AuthenticationController(AuthenticationService service, IConfiguration configuration, ILoggerFactory loggerFactory) : base(service, configuration, loggerFactory)
-        {
+        {   
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Tenant.Query.Controllers.Authentication
         /// <returns>The token.</returns>
         /// <param name="validationContext">Validation context.</param>
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost]      
         [Route("tenant-token")]
         [Produces("text/plain")]
         [ApiExplorerSettings(IgnoreApi = true)]

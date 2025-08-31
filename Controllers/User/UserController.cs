@@ -72,6 +72,330 @@ namespace Tenant.Query.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult() { Exception = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Authenticate user login
+        /// </summary>
+        /// <param name="request">Login credentials</param>
+        /// <returns>User information and authentication token</returns>
+        [HttpPost]
+        [Route("auth/login")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Unauthorized", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status423Locked, "Account Locked", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
+        public async Task<IActionResult> Login([FromBody] Model.User.LoginRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new ApiResult { Exception = "Request cannot be null" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ApiResult { Exception = "Invalid request model" });
+                }
+
+                var loginResponse = await this.Service.Login(request);
+                return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = loginResponse });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResult { Exception = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Account locked
+                return StatusCode(StatusCodes.Status423Locked, new ApiResult { Exception = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResult { Exception = ex.Message });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult { Exception = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Register a new user
+        /// </summary>
+        /// <param name="request">Registration details</param>
+        /// <returns>User information and authentication token</returns>
+        [HttpPost]
+        [Route("auth/register")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone already exists", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
+        public async Task<IActionResult> Register([FromBody] Model.User.RegisterRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new ApiResult { Exception = "Request cannot be null" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    return BadRequest(new ApiResult { Exception = string.Join("; ", errors) });
+                }
+
+                var registerResponse = await this.Service.Register(request);
+                return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = registerResponse });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Email or phone already exists
+                return StatusCode(StatusCodes.Status409Conflict, new ApiResult { Exception = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResult { Exception = ex.Message });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult { Exception = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Logout user and invalidate tokens
+        /// </summary>
+        /// <param name="request">Logout details</param>
+        /// <returns>Logout confirmation</returns>
+        [HttpPost]
+        [Route("auth/logout")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
+        public async Task<IActionResult> Logout([FromBody] Model.User.LogoutRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new ApiResult { Exception = "Request cannot be null" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    return BadRequest(new ApiResult { Exception = string.Join("; ", errors) });
+                }
+
+                // Extract IP address and User-Agent from request headers if not provided
+                if (string.IsNullOrEmpty(request.IpAddress))
+                {
+                    request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                }
+
+                if (string.IsNullOrEmpty(request.UserAgent))
+                {
+                    request.UserAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
+                }
+
+                var result = await this.Service.Logout(request);
+                return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = result });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResult { Exception = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResult { Exception = ex.Message });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult { Exception = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get user profile information
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <param name="tenantId">Optional tenant ID for validation</param>
+        /// <returns>User profile data</returns>
+        [HttpGet]
+        [Route("auth/profile")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(Model.User.UserProfileResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
+        public async Task<IActionResult> GetUserProfile([FromQuery] long userId, [FromQuery] long? tenantId = null)
+        {
+            try
+            {
+                if (userId <= 0)
+                {
+                    return BadRequest(new ApiResult { Exception = "Valid User ID is required" });
+                }
+
+                var profileResponse = await this.Service.GetUserProfile(userId, tenantId);
+                return StatusCode(StatusCodes.Status200OK, profileResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var errorResponse = new Model.User.UserProfileResponse
+                {
+                    Success = false,
+                    Data = null,
+                    Message = ex.Message
+                };
+                return NotFound(errorResponse);
+            }
+            catch (ArgumentException ex)
+            {
+                var errorResponse = new Model.User.UserProfileResponse
+                {
+                    Success = false,
+                    Data = null,
+                    Message = ex.Message
+                };
+                return BadRequest(errorResponse);
+            }
+            catch (System.Exception ex)
+            {
+                var errorResponse = new Model.User.UserProfileResponse
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "An error occurred while retrieving the profile"
+                };
+                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
+            }
+        }
+
+        /// <summary>
+        /// Update user profile information
+        /// </summary>
+        /// <param name="request">Profile update details</param>
+        /// <returns>Success confirmation</returns>
+        [HttpPost]
+        [Route("auth/update-profile")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Phone number already exists", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
+        public async Task<IActionResult> UpdateProfile([FromBody] Model.User.UpdateProfileRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new ApiResult { Exception = "Request cannot be null" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    return BadRequest(new ApiResult { Exception = string.Join("; ", errors) });
+                }
+
+                var result = await this.Service.UpdateProfile(request);
+                return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = result });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResult { Exception = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Phone number already exists for another user
+                return StatusCode(StatusCodes.Status409Conflict, new ApiResult { Exception = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResult { Exception = ex.Message });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult { Exception = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Reset user password using reset token
+        /// </summary>
+        /// <param name="request">Password reset details</param>
+        /// <returns>Success confirmation</returns>
+        [HttpPost]
+        [Route("auth/reset-password")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Invalid or expired token", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Token already used", typeof(ApiResult))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
+        public async Task<IActionResult> ResetPassword([FromBody] Model.User.ResetPasswordRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new ApiResult { Exception = "Request cannot be null" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    return BadRequest(new ApiResult { Exception = string.Join("; ", errors) });
+                }
+
+                // Extract IP address and User-Agent from request headers if not provided
+                if (string.IsNullOrEmpty(request.IpAddress))
+                {
+                    request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                }
+
+                if (string.IsNullOrEmpty(request.UserAgent))
+                {
+                    request.UserAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
+                }
+
+                var result = await this.Service.ResetPassword(request);
+                return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = result });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Invalid or expired token
+                return StatusCode(StatusCodes.Status401Unauthorized, new ApiResult { Exception = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Token already used or other operation conflicts
+                return StatusCode(StatusCodes.Status409Conflict, new ApiResult { Exception = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResult { Exception = ex.Message });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult { Exception = ex.Message });
+            }
+        }
         #endregion
     }
 }
