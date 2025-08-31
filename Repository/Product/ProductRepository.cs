@@ -16,6 +16,7 @@ using Tenant.Query.Uitility;
 using SixLabors.ImageSharp;
 using Tenant.Query.Model.WishList;
 using Tenant.Query.Model.ProductCart;
+using Tenant.Query.Model.Constant;
 
 namespace Tenant.Query.Repository.Product
 {
@@ -669,6 +670,435 @@ namespace Tenant.Query.Repository.Product
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public string GetConfigValueByKey(string key)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "CONFIG_KEY", key }
+                    // { "TenantId", tenantId },
+                    // { "AuditInfo", auditInfo },
+                    // { "UserId", userId },
+                    // { "BrowserName", payload.BrowserName },
+                    // { "BrowserVersion", payload.BrowserVersion }
+                };
+                var slaValue = _dataAccess.ExecuteScalarSQL(Constant.StoredProcedures.SP_GET_VALUE_BY_KEY, parameters);
+                
+                return slaValue.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Delete a product
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="productId">Product ID</param>
+        /// <param name="userId">User ID performing the deletion</param>
+        /// <returns>Task</returns>
+        public async Task DeleteProduct(long tenantId, long productId, long userId)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "ProductId", productId },
+                    { "TenantId", tenantId },
+                    { "UserId", userId }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_DELETE_PRODUCT,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Product not found or does not belong to this tenant");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get all categories
+        /// </summary>
+        /// <param name="tenantId">Optional tenant ID filter</param>
+        /// <returns>List of categories</returns>
+        public List<CategoryListItem> GetAllCategories(long? tenantId = null)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>();
+                
+                if (tenantId.HasValue)
+                {
+                    parameters.Add("TenantId", tenantId.Value);
+                }
+
+                var result = _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_GET_ALL_CATEGORIES,
+                    parameters
+                );
+
+                var categories = new List<CategoryListItem>();
+
+                if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow row in result.Tables[0].Rows)
+                    {
+                        categories.Add(new CategoryListItem
+                        {
+                            CategoryId = Convert.ToInt64(row["CategoryId"]),
+                            Category = row["Category"].ToString(),
+                            Active = Convert.ToBoolean(row["Active"]),
+                            SubMenu = Convert.ToBoolean(row["SubMenu"]),
+                            Created = row["Created"] != DBNull.Value ? Convert.ToDateTime(row["Created"]) : (DateTime?)null,
+                            Modified = row["Modified"] != DBNull.Value ? Convert.ToDateTime(row["Modified"]) : (DateTime?)null,
+                            OrderBy = row["OrderBy"] != DBNull.Value ? Convert.ToInt32(row["OrderBy"]) : (int?)null,
+                            Description = row["Description"]?.ToString(),
+                            Icon = row["Icon"]?.ToString(),
+                            ParentCategoryId = row["ParentCategoryId"] != DBNull.Value ? Convert.ToInt64(row["ParentCategoryId"]) : (long?)null,
+                            TenantId = Convert.ToInt64(row["TenantId"])
+                        });
+                    }
+                }
+
+                return categories;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Add a new category
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Category details</param>
+        /// <param name="userId">User ID creating the category</param>
+        /// <returns>Newly created category ID</returns>
+        public async Task<long> AddCategory(long tenantId, AddCategoryRequest request, long userId)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "TenantId", tenantId },
+                    { "CategoryName", request.CategoryName },
+                    { "Description", request.Description ?? (object)DBNull.Value },
+                    { "Active", request.Active },
+                    { "ParentCategoryId", request.ParentCategoryId ?? (object)DBNull.Value },
+                    { "OrderBy", request.OrderBy },
+                    { "Icon", request.Icon ?? (object)DBNull.Value },
+                    { "HasSubMenu", request.HasSubMenu },
+                    { "Link", request.Link ?? (object)DBNull.Value },
+                    { "UserId", userId }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_ADD_CATEGORY,
+                    parameters
+                ));
+
+                if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+                {
+                    return Convert.ToInt64(result.Tables[0].Rows[0]["CategoryId"]);
+                }
+
+                throw new Exception("Failed to get category ID after insertion");
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update an existing category
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Category details</param>
+        /// <param name="userId">User ID performing the update</param>
+        /// <returns>Task</returns>
+        public async Task UpdateCategory(long tenantId, UpdateCategoryRequest request, long userId)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "CategoryId", request.CategoryId },
+                    { "TenantId", tenantId },
+                    { "CategoryName", request.CategoryName },
+                    { "Description", request.Description ?? (object)DBNull.Value },
+                    { "Active", request.Active },
+                    { "ParentCategoryId", request.ParentCategoryId ?? (object)DBNull.Value },
+                    { "OrderBy", request.OrderBy },
+                    { "Icon", request.Icon ?? (object)DBNull.Value },
+                    { "HasSubMenu", request.HasSubMenu },
+                    { "Link", request.Link ?? (object)DBNull.Value },
+                    { "UserId", userId }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_UPDATE_CATEGORY,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Category not found or does not belong to this tenant");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get menu master with categories
+        /// </summary>
+        /// <param name="tenantId">Optional tenant ID filter</param>
+        /// <returns>Menu master with associated categories</returns>
+        public MenuMasterResponse GetMenuMaster(long? tenantId = null)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>();
+                
+                if (tenantId.HasValue)
+                {
+                    parameters.Add("TenantId", tenantId.Value);
+                }
+
+                var result = _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_GET_MENU_MASTER,
+                    parameters
+                );
+
+                var response = new MenuMasterResponse();
+                var menuDictionary = new Dictionary<long, MenuMasterItem>();
+
+                if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow row in result.Tables[0].Rows)
+                    {
+                        var menuId = Convert.ToInt64(row["MenuId"]);
+                        
+                        // Create or get menu item
+                        if (!menuDictionary.ContainsKey(menuId))
+                        {
+                            menuDictionary[menuId] = new MenuMasterItem
+                            {
+                                MenuId = menuId,
+                                MenuName = row["MenuName"].ToString(),
+                                OrderBy = Convert.ToInt32(row["OrderBy"]),
+                                Active = Convert.ToBoolean(row["Active"]),
+                                Image = row["Image"]?.ToString() ?? "",
+                                SubMenu = Convert.ToBoolean(row["SubMenu"]),
+                                TenantId = Convert.ToInt64(row["TenantId"]),
+                                Created = row["Created"] != DBNull.Value ? Convert.ToDateTime(row["Created"]) : (DateTime?)null,
+                                Modified = row["Modified"] != DBNull.Value ? Convert.ToDateTime(row["Modified"]) : (DateTime?)null,
+                                Category = new List<MenuCategoryItem>()
+                            };
+                        }
+
+                        // Add category if it exists
+                        if (row["CategoryId"] != DBNull.Value)
+                        {
+                            var categoryId = Convert.ToInt64(row["CategoryId"]);
+                            var existingCategory = menuDictionary[menuId].Category
+                                .FirstOrDefault(c => c.CategoryId == categoryId);
+
+                            if (existingCategory == null)
+                            {
+                                menuDictionary[menuId].Category.Add(new MenuCategoryItem
+                                {
+                                    CategoryId = categoryId,
+                                    Category = row["Category"].ToString(),
+                                    Active = Convert.ToBoolean(row["CategoryActive"]),
+                                    OrderBy = row["CategoryOrderBy"] != DBNull.Value ? Convert.ToInt32(row["CategoryOrderBy"]) : (int?)null,
+                                    Icon = row["CategoryIcon"]?.ToString(),
+                                    Description = row["CategoryDescription"]?.ToString()
+                                });
+                            }
+                        }
+                    }
+
+                    // Convert dictionary to list and sort
+                    response.MenuMaster = menuDictionary.Values
+                        .OrderBy(m => m.OrderBy)
+                        .ThenBy(m => m.MenuName)
+                        .ToList();
+
+                    // Sort categories within each menu
+                    foreach (var menu in response.MenuMaster)
+                    {
+                        menu.Category = menu.Category
+                            .OrderBy(c => c.OrderBy ?? 0)
+                            .ThenBy(c => c.Category)
+                            .ToList();
+                    }
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update an existing product
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Product details</param>
+        /// <returns>Product ID</returns>
+        public async Task<long> UpdateProduct(long tenantId, UpdateProductRequest request)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "ProductId", request.ProductId },
+                    { "TenantId", tenantId },
+                    { "ProductName", request.ProductName },
+                    { "ProductDescription", request.ProductDescription },
+                    { "ProductCode", request.ProductCode },
+                    { "FullDescription", request.FullDescription },
+                    { "Specification", request.Specification },
+                    { "Story", request.Story },
+                    { "PackQuantity", request.PackQuantity },
+                    { "Quantity", request.Quantity },
+                    { "Total", request.Total },
+                    { "Price", request.Price },
+                    { "Category", request.Category },
+                    { "Rating", request.Rating },
+                    { "Active", request.Active },
+                    { "Trending", request.Trending },
+                    { "UserBuyCount", request.UserBuyCount },
+                    { "Return", request.Return },
+                    { "BestSeller", request.BestSeller },
+                    { "DeliveryDate", request.DeliveryDate },
+                    { "Offer", request.Offer },
+                    { "OrderBy", request.OrderBy },
+                    { "UserId", request.UserId },
+                    { "ModifiedBy", request.UserId }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_UPDATE_PRODUCT,
+                    parameters
+                ));
+
+                if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+                {
+                    return Convert.ToInt64(result.Tables[0].Rows[0]["ProductId"]);
+                }
+
+                throw new KeyNotFoundException("Product not found or update failed");
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Add a new product
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Product details</param>
+        /// <returns>Product ID</returns>
+        public async Task<long> AddProduct(long tenantId, AddProductRequest request)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "TenantId", tenantId },
+                    { "ProductName", request.ProductName },
+                    { "ProductDescription", request.ProductDescription },
+                    { "ProductCode", request.ProductCode },
+                    { "FullDescription", request.FullDescription },
+                    { "Specification", request.Specification },
+                    { "Story", request.Story },
+                    { "PackQuantity", request.PackQuantity },
+                    { "Quantity", request.Quantity },
+                    { "Total", request.Total },
+                    { "Price", request.Price },
+                    { "Category", request.Category },
+                    { "Rating", request.Rating },
+                    { "Active", request.Active },
+                    { "Trending", request.Trending },
+                    { "UserBuyCount", request.UserBuyCount },
+                    { "Return", request.Return },
+                    { "BestSeller", request.BestSeller },
+                    { "DeliveryDate", request.DeliveryDate },
+                    { "Offer", request.Offer },
+                    { "OrderBy", request.OrderBy },
+                    { "UserId", request.UserId },
+                    { "CreatedBy", request.UserId }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_ADD_PRODUCT,
+                    parameters
+                ));
+
+                if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+                {
+                    return Convert.ToInt64(result.Tables[0].Rows[0]["ProductId"]);
+                }
+
+                throw new Exception("Failed to get product ID after insertion");
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get product details by ID
+        /// </summary>
+        /// <param name="productId">Product ID</param>
+        /// <returns>DataSet containing product details and images</returns>
+        public async Task<DataSet> GetProductById(long productId)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "ProductId", productId }
+                };
+
+                return await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_GET_PRODUCT_BY_ID,
+                    parameters
+                ));
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
         /// DeleteImages
         /// </summary>
         /// <param name="id"></param>
@@ -710,6 +1140,1746 @@ namespace Tenant.Query.Repository.Product
         //        throw new Exception("An error occurred while inserting the category", ex);
         //    }
         //}
+
+        /// <summary>
+        /// Search products with advanced filtering and pagination
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="payload">Search parameters</param>
+        /// <param name="offset">Pagination offset</param>
+        /// <returns>DataSet containing products and total count</returns>
+        public DataSet SearchProducts(string tenantId, ProductSearchPayload payload, int offset)
+        {
+            try
+            {
+                // Execute stored procedure for product search
+                DataSet result = _dataAccess.ExecuteDataset(
+                    Constant.StoredProcedures.SP_SEARCH_PRODUCTS,
+                    Convert.ToInt64(tenantId),
+                    payload.Page,
+                    payload.Limit,
+                    offset,
+                    payload.Search ?? string.Empty,
+                    payload.Category,
+                    payload.MinPrice,
+                    payload.MaxPrice,
+                    payload.Rating,
+                    payload.InStock,
+                    payload.BestSeller,
+                    payload.HasOffer,
+                    payload.SortBy ?? "created",
+                    payload.SortOrder ?? "desc"
+                );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get user's shopping cart with full product details
+        /// </summary>
+        /// <param name="request">Cart request with user details</param>
+        /// <returns>Complete cart information</returns>
+        public async Task<Model.User.CartResponse> GetUserCart(Model.ProductCart.GetCartRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Get cart for user {request.UserId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "UserId", request.UserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_GET_USER_CART,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0)
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+
+                var cartResponse = new Model.User.CartResponse();
+                var cartItems = new Dictionary<long, Model.User.CartItem>();
+
+                // Process cart items (first result set)
+                if (result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow row in result.Tables[0].Rows)
+                    {
+                        var cartId = Convert.ToInt64(row["CartId"]);
+                        
+                        if (!cartItems.ContainsKey(cartId))
+                        {
+                            var cartItem = new Model.User.CartItem
+                            {
+                                Id = $"cart_item_{cartId}",
+                                CartId = cartId,
+                                UserId = Convert.ToInt64(row["UserId"]),
+                                TenantId = Convert.ToInt64(row["TenantId"]),
+                                Quantity = Convert.ToInt32(row["Quantity"]),
+                                AddedDate = Convert.ToDateTime(row["AddedDate"]),
+                                UpdatedDate = row["UpdatedDate"] != DBNull.Value ? Convert.ToDateTime(row["UpdatedDate"]) : null,
+                                SessionId = row["SessionId"]?.ToString() ?? "",
+                                ItemTotal = Convert.ToDecimal(row["ItemTotal"]),
+                                IsAvailable = Convert.ToBoolean(row["IsAvailable"]),
+                                Product = new Model.User.CartProductDetails
+                                {
+                                    ProductId = Convert.ToInt64(row["ProductId"]),
+                                    ProductName = row["ProductName"]?.ToString() ?? "",
+                                    ProductDescription = row["ProductDescription"]?.ToString() ?? "",
+                                    ProductCode = row["ProductCode"]?.ToString() ?? "",
+                                    FullDescription = row["FullDescription"]?.ToString() ?? "",
+                                    Specification = row["Specification"]?.ToString() ?? "",
+                                    Story = row["Story"]?.ToString() ?? "",
+                                    PackQuantity = row["PackQuantity"] != DBNull.Value ? Convert.ToInt32(row["PackQuantity"]) : 0,
+                                    AvailableQuantity = Convert.ToInt32(row["ProductAvailableQuantity"]),
+                                    Price = Convert.ToDecimal(row["Price"]),
+                                    Rating = row["Rating"] != DBNull.Value ? Convert.ToDecimal(row["Rating"]) : 0,
+                                    Active = Convert.ToBoolean(row["ProductActive"]),
+                                    Trending = row["Trending"] != DBNull.Value ? Convert.ToBoolean(row["Trending"]) : false,
+                                    UserBuyCount = row["UserBuyCount"] != DBNull.Value ? Convert.ToInt32(row["UserBuyCount"]) : 0,
+                                    ReturnPolicy = row["ReturnPolicy"] != DBNull.Value ? Convert.ToInt32(row["ReturnPolicy"]) : 0,
+                                    Created = Convert.ToDateTime(row["ProductCreated"]),
+                                    Modified = row["ProductModified"] != DBNull.Value ? Convert.ToDateTime(row["ProductModified"]) : null,
+                                    InStock = row["InStock"] != DBNull.Value ? Convert.ToBoolean(row["InStock"]) : false,
+                                    BestSeller = row["BestSeller"] != DBNull.Value ? Convert.ToBoolean(row["BestSeller"]) : false,
+                                    DeliveryDate = row["DeliveryDate"] != DBNull.Value ? Convert.ToInt32(row["DeliveryDate"]) : 0,
+                                    Offer = row["Offer"]?.ToString() ?? "",
+                                    Overview = row["Overview"]?.ToString() ?? "",
+                                    LongDescription = row["LongDescription"]?.ToString() ?? "",
+                                    Category = new Model.User.CartProductCategory
+                                    {
+                                        CategoryId = row["CategoryId"] != DBNull.Value ? Convert.ToInt64(row["CategoryId"]) : 0,
+                                        CategoryName = row["CategoryName"]?.ToString() ?? "",
+                                        Active = row["CategoryActive"] != DBNull.Value ? Convert.ToBoolean(row["CategoryActive"]) : false,
+                                        Description = row["CategoryDescription"]?.ToString() ?? "",
+                                        Icon = row["CategoryIcon"]?.ToString() ?? "",
+                                        SubMenu = row["CategorySubMenu"] != DBNull.Value ? Convert.ToBoolean(row["CategorySubMenu"]) : false
+                                    },
+                                    Images = new List<Model.User.CartProductImage>()
+                                }
+                            };
+
+                            cartItems[cartId] = cartItem;
+                        }
+
+                        // Add product image if exists and images are requested
+                        if (request.IncludeImages && row["ImageId"] != DBNull.Value)
+                        {
+                            var imageId = Convert.ToInt64(row["ImageId"]);
+                            var existingImage = cartItems[cartId].Product.Images.FirstOrDefault(img => img.ImageId == imageId);
+                            
+                            if (existingImage == null)
+                            {
+                                cartItems[cartId].Product.Images.Add(new Model.User.CartProductImage
+                                {
+                                    ImageId = imageId,
+                                    ImageUrl = row["ImageUrl"]?.ToString() ?? "",
+                                    IsMainImage = row["IsMainImage"] != DBNull.Value ? Convert.ToBoolean(row["IsMainImage"]) : false,
+                                    Active = row["ImageActive"] != DBNull.Value ? Convert.ToBoolean(row["ImageActive"]) : false,
+                                    OrderBy = row["ImageOrderBy"] != DBNull.Value ? Convert.ToInt32(row["ImageOrderBy"]) : 0
+                                });
+                            }
+                        }
+                    }
+
+                    cartResponse.Items = cartItems.Values.OrderByDescending(item => item.AddedDate).ToList();
+                }
+
+                // Process cart summary (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var summaryRow = result.Tables[1].Rows[0];
+                    cartResponse.Summary = new Model.User.CartSummary
+                    {
+                        TotalItems = Convert.ToInt32(summaryRow["TotalItems"]),
+                        TotalQuantity = Convert.ToInt32(summaryRow["TotalQuantity"]),
+                        TotalAmount = Convert.ToDecimal(summaryRow["TotalAmount"]),
+                        AvailableItemsTotal = Convert.ToDecimal(summaryRow["AvailableItemsTotal"]),
+                        UnavailableItems = Convert.ToInt32(summaryRow["UnavailableItems"])
+                    };
+                }
+
+                // Process recommended products (third result set) if requested
+                if (request.IncludeRecommendations && result.Tables.Count > 2 && result.Tables[2].Rows.Count > 0)
+                {
+                    cartResponse.RecommendedProducts = new List<Model.User.RecommendedProduct>();
+                    foreach (DataRow row in result.Tables[2].Rows)
+                    {
+                        cartResponse.RecommendedProducts.Add(new Model.User.RecommendedProduct
+                        {
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            ProductName = row["ProductName"]?.ToString() ?? "",
+                            Price = Convert.ToDecimal(row["Price"]),
+                            Rating = row["Rating"] != DBNull.Value ? Convert.ToDecimal(row["Rating"]) : 0,
+                            BestSeller = row["BestSeller"] != DBNull.Value ? Convert.ToBoolean(row["BestSeller"]) : false,
+                            Offer = row["Offer"]?.ToString() ?? "",
+                            ImageUrl = row["ImageUrl"]?.ToString() ?? ""
+                        });
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Cart retrieval successful for user {request.UserId} - {cartResponse.Items.Count} items");
+
+                return cartResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Cart retrieval error for user {request.UserId}: {ex.Message}");
+                
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException(ex.Message);
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Add item to cart
+        /// </summary>
+        /// <param name="request">Add to cart request</param>
+        /// <returns>Cart item details and summary</returns>
+        public async Task<Model.ProductCart.AddToCartResponse> AddItemToCart(Model.ProductCart.AddToCartRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Add to cart for user {request.UserId}, product {request.ProductId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "UserId", request.UserId },
+                    { "ProductId", request.ProductId },
+                    { "Quantity", request.Quantity },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "SessionId", request.SessionId ?? (object)DBNull.Value },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_ADD_ITEM_TO_CART,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Failed to add item to cart - user or product not found");
+                }
+
+                // Process cart item result (first result set)
+                var cartItemRow = result.Tables[0].Rows[0];
+                var cartResponse = new Model.ProductCart.AddToCartResponse
+                {
+                    CartId = Convert.ToInt64(cartItemRow["CartId"]),
+                    UserId = Convert.ToInt64(cartItemRow["UserId"]),
+                    ProductId = Convert.ToInt64(cartItemRow["ProductId"]),
+                    ProductName = cartItemRow["ProductName"]?.ToString() ?? "",
+                    Quantity = Convert.ToInt32(cartItemRow["Quantity"]),
+                    Price = Convert.ToDecimal(cartItemRow["Price"]),
+                    ItemTotal = Convert.ToDecimal(cartItemRow["ItemTotal"]),
+                    Message = cartItemRow["Message"]?.ToString() ?? "Product added to cart successfully",
+                    UpdatedDate = cartItemRow.Table.Columns.Contains("UpdatedDate") 
+                        ? Convert.ToDateTime(cartItemRow["UpdatedDate"]) 
+                        : Convert.ToDateTime(cartItemRow["AddedDate"])
+                };
+
+                // Process cart summary (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var summaryRow = result.Tables[1].Rows[0];
+                    cartResponse.Summary = new Model.ProductCart.CartSummaryInfo
+                    {
+                        TotalUniqueItems = Convert.ToInt32(summaryRow["TotalUniqueItems"]),
+                        TotalQuantity = Convert.ToInt32(summaryRow["TotalQuantity"]),
+                        TotalAmount = Convert.ToDecimal(summaryRow["TotalAmount"])
+                    };
+                }
+
+                this.Logger.LogInformation($"Repository: Add to cart successful for user {request.UserId}, product {request.ProductId}");
+
+                return cartResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Add to cart error for user {request.UserId}, product {request.ProductId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("Product not found or inactive"))
+                {
+                    throw new KeyNotFoundException("Product not found or inactive");
+                }
+                else if (ex.Message.Contains("Insufficient stock"))
+                {
+                    throw new InvalidOperationException(ex.Message);
+                }
+                else if (ex.Message.Contains("Quantity must be greater than 0"))
+                {
+                    throw new ArgumentException("Quantity must be greater than 0");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Remove item from cart
+        /// </summary>
+        /// <param name="request">Remove from cart request</param>
+        /// <returns>Removal confirmation and updated cart summary</returns>
+        public async Task<Model.ProductCart.RemoveFromCartResponse> RemoveItemFromCart(Model.ProductCart.RemoveFromCartRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Remove from cart for user {request.UserId}, product {request.ProductId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "UserId", request.UserId },
+                    { "ProductId", request.ProductId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "RemoveCompletely", request.RemoveCompletely },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_REMOVE_ITEM_FROM_CART,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Product not found in cart");
+                }
+
+                // Process removal result (first result set)
+                var removalRow = result.Tables[0].Rows[0];
+                var removeResponse = new Model.ProductCart.RemoveFromCartResponse
+                {
+                    CartId = Convert.ToInt64(removalRow["CartId"]),
+                    UserId = Convert.ToInt64(removalRow["UserId"]),
+                    ProductId = Convert.ToInt64(removalRow["ProductId"]),
+                    ProductName = removalRow["ProductName"]?.ToString() ?? "",
+                    RemovedQuantity = Convert.ToInt32(removalRow["RemovedQuantity"]),
+                    Price = Convert.ToDecimal(removalRow["Price"]),
+                    ItemTotal = Convert.ToDecimal(removalRow["ItemTotal"]),
+                    Message = removalRow["Message"]?.ToString() ?? "Product removed from cart successfully",
+                    RemovedDate = Convert.ToDateTime(removalRow["RemovedDate"])
+                };
+
+                // Process cart summary (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var summaryRow = result.Tables[1].Rows[0];
+                    removeResponse.Summary = new Model.ProductCart.CartSummaryInfo
+                    {
+                        TotalUniqueItems = Convert.ToInt32(summaryRow["TotalUniqueItems"]),
+                        TotalQuantity = Convert.ToInt32(summaryRow["TotalQuantity"]),
+                        TotalAmount = Convert.ToDecimal(summaryRow["TotalAmount"])
+                    };
+                }
+
+                // Process recommended products (third result set)
+                if (result.Tables.Count > 2 && result.Tables[2].Rows.Count > 0)
+                {
+                    removeResponse.RecommendedProducts = new List<Model.ProductCart.RecommendedProduct>();
+                    foreach (DataRow row in result.Tables[2].Rows)
+                    {
+                        removeResponse.RecommendedProducts.Add(new Model.ProductCart.RecommendedProduct
+                        {
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            ProductName = row["ProductName"]?.ToString() ?? "",
+                            Price = Convert.ToDecimal(row["Price"]),
+                            Rating = row["Rating"] != DBNull.Value ? Convert.ToDecimal(row["Rating"]) : 0,
+                            BestSeller = row["BestSeller"] != DBNull.Value ? Convert.ToBoolean(row["BestSeller"]) : false,
+                            Offer = row["Offer"]?.ToString() ?? "",
+                            ImageUrl = row["ImageUrl"]?.ToString() ?? ""
+                        });
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Remove from cart successful for user {request.UserId}, product {request.ProductId}");
+
+                return removeResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Remove from cart error for user {request.UserId}, product {request.ProductId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("Product not found in cart"))
+                {
+                    throw new KeyNotFoundException("Product not found in cart");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Clear entire cart
+        /// </summary>
+        /// <param name="request">Clear cart request</param>
+        /// <returns>Cart clearing confirmation and statistics</returns>
+        public async Task<Model.ProductCart.ClearCartResponse> ClearCart(Model.ProductCart.ClearCartRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Clear cart for user {request.UserId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "UserId", request.UserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "ClearCompletely", request.ClearCompletely },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_CLEAR_CART,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("User not found or cart is already empty");
+                }
+
+                // Process clear cart result (first result set)
+                var clearRow = result.Tables[0].Rows[0];
+                var clearResponse = new Model.ProductCart.ClearCartResponse
+                {
+                    UserId = Convert.ToInt64(clearRow["UserId"]),
+                    ClearedItemCount = Convert.ToInt32(clearRow["ClearedItemCount"]),
+                    ClearedQuantity = Convert.ToInt32(clearRow["ClearedQuantity"]),
+                    ClearedValue = Convert.ToDecimal(clearRow["ClearedValue"]),
+                    Message = clearRow["Message"]?.ToString() ?? "Cart cleared successfully",
+                    ClearedDate = Convert.ToDateTime(clearRow["ClearedDate"]),
+                    WasHardDelete = Convert.ToBoolean(clearRow["WasHardDelete"])
+                };
+
+                // Process cart summary (second result set - should be empty)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var summaryRow = result.Tables[1].Rows[0];
+                    clearResponse.Summary = new Model.ProductCart.CartSummaryInfo
+                    {
+                        TotalUniqueItems = Convert.ToInt32(summaryRow["TotalUniqueItems"]),
+                        TotalQuantity = Convert.ToInt32(summaryRow["TotalQuantity"]),
+                        TotalAmount = Convert.ToDecimal(summaryRow["TotalAmount"])
+                    };
+                }
+
+                // Process popular products (third result set)
+                if (result.Tables.Count > 2 && result.Tables[2].Rows.Count > 0)
+                {
+                    clearResponse.PopularProducts = new List<Model.ProductCart.PopularProduct>();
+                    foreach (DataRow row in result.Tables[2].Rows)
+                    {
+                        clearResponse.PopularProducts.Add(new Model.ProductCart.PopularProduct
+                        {
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            ProductName = row["ProductName"]?.ToString() ?? "",
+                            Price = Convert.ToDecimal(row["Price"]),
+                            Rating = row["Rating"] != DBNull.Value ? Convert.ToDecimal(row["Rating"]) : 0,
+                            BestSeller = row["BestSeller"] != DBNull.Value ? Convert.ToBoolean(row["BestSeller"]) : false,
+                            Trending = row["Trending"] != DBNull.Value ? Convert.ToBoolean(row["Trending"]) : false,
+                            UserBuyCount = row["UserBuyCount"] != DBNull.Value ? Convert.ToInt32(row["UserBuyCount"]) : 0,
+                            Offer = row["Offer"]?.ToString() ?? "",
+                            ImageUrl = row["ImageUrl"]?.ToString() ?? "",
+                            CategoryName = row["CategoryName"]?.ToString() ?? ""
+                        });
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Clear cart successful for user {request.UserId} - {clearResponse.ClearedItemCount} items cleared");
+
+                return clearResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Clear cart error for user {request.UserId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("Cart is already empty"))
+                {
+                    throw new KeyNotFoundException("Cart is already empty");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Create a new order
+        /// </summary>
+        /// <param name="request">Create order request</param>
+        /// <returns>Order creation confirmation and details</returns>
+        public async Task<Model.Order.CreateOrderResponse> CreateOrder(Model.Order.CreateOrderRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Create order for user {request.UserId} with {request.Items.Count} items");
+
+                // Serialize complex objects to JSON for the stored procedure
+                var orderItemsJson = System.Text.Json.JsonSerializer.Serialize(request.Items);
+                var shippingAddressJson = System.Text.Json.JsonSerializer.Serialize(request.ShippingAddress);
+                var billingAddressJson = System.Text.Json.JsonSerializer.Serialize(request.BillingAddress);
+                var paymentMethodJson = System.Text.Json.JsonSerializer.Serialize(request.PaymentMethod);
+                var shippingMethodJson = System.Text.Json.JsonSerializer.Serialize(request.ShippingMethod);
+                var orderTotalsJson = System.Text.Json.JsonSerializer.Serialize(request.Totals);
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "UserId", request.UserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "OrderItems", orderItemsJson },
+                    { "ShippingAddress", shippingAddressJson },
+                    { "BillingAddress", billingAddressJson },
+                    { "PaymentMethod", paymentMethodJson },
+                    { "ShippingMethod", shippingMethodJson },
+                    { "OrderTotals", orderTotalsJson },
+                    { "Notes", request.Notes ?? (object)DBNull.Value },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_CREATE_ORDER,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Failed to create order - user not found or invalid data");
+                }
+
+                // Process order creation result (first result set)
+                var orderRow = result.Tables[0].Rows[0];
+                var orderResponse = new Model.Order.CreateOrderResponse
+                {
+                    OrderId = Convert.ToInt64(orderRow["OrderId"]),
+                    OrderNumber = orderRow["OrderNumber"]?.ToString() ?? "",
+                    UserId = Convert.ToInt64(orderRow["UserId"]),
+                    ItemCount = Convert.ToInt32(orderRow["ItemCount"]),
+                    TotalAmount = Convert.ToDecimal(orderRow["TotalAmount"]),
+                    OrderStatus = orderRow["OrderStatus"]?.ToString() ?? "",
+                    PaymentStatus = orderRow["PaymentStatus"]?.ToString() ?? "",
+                    Message = orderRow["Message"]?.ToString() ?? "Order created successfully",
+                    CreatedDate = Convert.ToDateTime(orderRow["CreatedDate"])
+                };
+
+                // Process order summary (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var summaryRow = result.Tables[1].Rows[0];
+                    orderResponse.Summary = new Model.Order.OrderSummaryInfo
+                    {
+                        OrderId = Convert.ToInt64(summaryRow["OrderId"]),
+                        OrderNumber = summaryRow["OrderNumber"]?.ToString() ?? "",
+                        TotalAmount = Convert.ToDecimal(summaryRow["TotalAmount"]),
+                        OrderStatus = summaryRow["OrderStatus"]?.ToString() ?? "",
+                        PaymentStatus = summaryRow["PaymentStatus"]?.ToString() ?? "",
+                        CreatedAt = Convert.ToDateTime(summaryRow["CreatedAt"]),
+                        TotalItems = Convert.ToInt32(summaryRow["TotalItems"]),
+                        TotalQuantity = Convert.ToInt32(summaryRow["TotalQuantity"])
+                    };
+                }
+
+                // Process order items (third result set)
+                if (result.Tables.Count > 2 && result.Tables[2].Rows.Count > 0)
+                {
+                    orderResponse.Items = new List<Model.Order.OrderItemInfo>();
+                    foreach (DataRow row in result.Tables[2].Rows)
+                    {
+                        orderResponse.Items.Add(new Model.Order.OrderItemInfo
+                        {
+                            OrderItemId = Convert.ToInt64(row["OrderItemId"]),
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            ProductName = row["ProductName"]?.ToString() ?? "",
+                            ProductImage = row["ProductImage"]?.ToString() ?? "",
+                            Price = Convert.ToDecimal(row["Price"]),
+                            Quantity = Convert.ToInt32(row["Quantity"]),
+                            Total = Convert.ToDecimal(row["Total"]),
+                            ProductCode = row["ProductCode"]?.ToString() ?? "",
+                            Category = row["Category"]?.ToString() ?? ""
+                        });
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Create order successful for user {request.UserId}, Order Number: {orderResponse.OrderNumber}");
+
+                return orderResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Create order error for user {request.UserId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("Order must contain at least one item"))
+                {
+                    throw new ArgumentException("Order must contain at least one item");
+                }
+                else if (ex.Message.Contains("Insufficient stock"))
+                {
+                    throw new InvalidOperationException(ex.Message);
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get user orders with pagination and filtering
+        /// </summary>
+        /// <param name="request">Get orders request</param>
+        /// <returns>List of orders with pagination information</returns>
+        public async Task<Model.Order.GetOrdersResponse> GetOrders(Model.Order.GetOrdersRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Get orders for user {request.UserId}, page {request.Page}, limit {request.Limit}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "UserId", request.UserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "Page", request.Page },
+                    { "Limit", request.Limit },
+                    { "Status", request.Status ?? (object)DBNull.Value },
+                    { "Search", request.Search ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_GET_ORDERS,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0)
+                {
+                    throw new KeyNotFoundException("User not found or no orders available");
+                }
+
+                var ordersResponse = new Model.Order.GetOrdersResponse();
+
+                // Process orders (first result set)
+                if (result.Tables[0].Rows.Count > 0)
+                {
+                    var ordersList = new List<Model.Order.OrderListItem>();
+                    var paginationInfo = new Model.Order.PaginationInfo();
+
+                    foreach (DataRow row in result.Tables[0].Rows)
+                    {
+                        var order = new Model.Order.OrderListItem
+                        {
+                            Id = Convert.ToInt64(row["OrderId"]),
+                            OrderNumber = row["OrderNumber"]?.ToString() ?? "",
+                            Status = row["OrderStatus"]?.ToString() ?? "",
+                            PaymentStatus = row["PaymentStatus"]?.ToString() ?? "",
+                            Total = Convert.ToDecimal(row["TotalAmount"]),
+                            Subtotal = Convert.ToDecimal(row["Subtotal"]),
+                            ShippingAmount = Convert.ToDecimal(row["ShippingAmount"]),
+                            TaxAmount = Convert.ToDecimal(row["TaxAmount"]),
+                            DiscountAmount = Convert.ToDecimal(row["DiscountAmount"]),
+                            Notes = row["Notes"]?.ToString() ?? "",
+                            CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                            UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                            TotalItems = Convert.ToInt32(row["TotalItems"]),
+                            TotalQuantity = Convert.ToInt32(row["TotalQuantity"])
+                        };
+
+                        ordersList.Add(order);
+
+                        // Set pagination info (same for all rows)
+                        if (paginationInfo.Total == 0)
+                        {
+                            paginationInfo.Page = Convert.ToInt32(row["CurrentPage"]);
+                            paginationInfo.Limit = Convert.ToInt32(row["PageSize"]);
+                            paginationInfo.Total = Convert.ToInt32(row["TotalCount"]);
+                            paginationInfo.TotalPages = Convert.ToInt32(row["TotalPages"]);
+                            paginationInfo.HasNext = Convert.ToBoolean(row["HasNext"]);
+                            paginationInfo.HasPrevious = Convert.ToBoolean(row["HasPrevious"]);
+                        }
+                    }
+
+                    ordersResponse.Orders = ordersList;
+                    ordersResponse.Pagination = paginationInfo;
+                }
+
+                // Process order items (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var orderItemsDict = new Dictionary<long, List<Model.Order.OrderListItemInfo>>();
+
+                    foreach (DataRow row in result.Tables[1].Rows)
+                    {
+                        var orderId = Convert.ToInt64(row["OrderId"]);
+                        var orderItem = new Model.Order.OrderListItemInfo
+                        {
+                            OrderItemId = Convert.ToInt64(row["OrderItemId"]),
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            ProductName = row["ProductName"]?.ToString() ?? "",
+                            ProductImage = row["ProductImage"]?.ToString() ?? "",
+                            Price = Convert.ToDecimal(row["Price"]),
+                            Quantity = Convert.ToInt32(row["Quantity"]),
+                            Total = Convert.ToDecimal(row["Total"]),
+                            ProductCode = row["ProductCode"]?.ToString() ?? "",
+                            Category = row["Category"]?.ToString() ?? "",
+                            Rating = row["Rating"] != DBNull.Value ? Convert.ToDecimal(row["Rating"]) : 0,
+                            Offer = row["Offer"]?.ToString() ?? ""
+                        };
+
+                        if (!orderItemsDict.ContainsKey(orderId))
+                        {
+                            orderItemsDict[orderId] = new List<Model.Order.OrderListItemInfo>();
+                        }
+                        orderItemsDict[orderId].Add(orderItem);
+                    }
+
+                    // Assign items to their respective orders
+                    foreach (var order in ordersResponse.Orders)
+                    {
+                        if (orderItemsDict.ContainsKey(order.Id))
+                        {
+                            order.Items = orderItemsDict[order.Id];
+                        }
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Get orders successful for user {request.UserId}, found {ordersResponse.Orders.Count} orders");
+
+                return ordersResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Get orders error for user {request.UserId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get order details by order ID
+        /// </summary>
+        /// <param name="request">Get order by ID request</param>
+        /// <returns>Detailed order information</returns>
+        public async Task<Model.Order.GetOrderByIdResponse> GetOrderById(Model.Order.GetOrderByIdRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Get order by ID for user {request.UserId}, order {request.OrderId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "OrderId", request.OrderId },
+                    { "UserId", request.UserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_GET_ORDER_BY_ID,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Order not found or does not belong to user");
+                }
+
+                // Process order details (first result set)
+                var orderRow = result.Tables[0].Rows[0];
+                var orderResponse = new Model.Order.GetOrderByIdResponse
+                {
+                    OrderId = Convert.ToInt64(orderRow["OrderId"]),
+                    OrderNumber = orderRow["OrderNumber"]?.ToString() ?? "",
+                    OrderStatus = orderRow["OrderStatus"]?.ToString() ?? "",
+                    PaymentStatus = orderRow["PaymentStatus"]?.ToString() ?? "",
+                    TotalAmount = Convert.ToDecimal(orderRow["TotalAmount"]),
+                    Subtotal = Convert.ToDecimal(orderRow["Subtotal"]),
+                    ShippingAmount = Convert.ToDecimal(orderRow["ShippingAmount"]),
+                    TaxAmount = Convert.ToDecimal(orderRow["TaxAmount"]),
+                    DiscountAmount = Convert.ToDecimal(orderRow["DiscountAmount"]),
+                    Notes = orderRow["Notes"]?.ToString() ?? "",
+                    ShippingAddress = orderRow["ShippingAddress"]?.ToString() ?? "",
+                    BillingAddress = orderRow["BillingAddress"]?.ToString() ?? "",
+                    PaymentMethod = orderRow["PaymentMethod"]?.ToString() ?? "",
+                    ShippingMethod = orderRow["ShippingMethod"]?.ToString() ?? "",
+                    CreatedAt = Convert.ToDateTime(orderRow["CreatedAt"]),
+                    UpdatedAt = Convert.ToDateTime(orderRow["UpdatedAt"]),
+                    CustomerName = orderRow["CustomerName"]?.ToString() ?? "",
+                    CustomerEmail = orderRow["CustomerEmail"]?.ToString() ?? "",
+                    CustomerPhone = orderRow["CustomerPhone"]?.ToString() ?? "",
+                    TotalItems = Convert.ToInt32(orderRow["TotalItems"]),
+                    TotalQuantity = Convert.ToInt32(orderRow["TotalQuantity"])
+                };
+
+                // Process order items (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    orderResponse.Items = new List<Model.Order.OrderDetailItemInfo>();
+                    foreach (DataRow row in result.Tables[1].Rows)
+                    {
+                        orderResponse.Items.Add(new Model.Order.OrderDetailItemInfo
+                        {
+                            OrderItemId = Convert.ToInt64(row["OrderItemId"]),
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            ProductName = row["ProductName"]?.ToString() ?? "",
+                            ProductImage = row["ProductImage"]?.ToString() ?? "",
+                            Price = Convert.ToDecimal(row["Price"]),
+                            Quantity = Convert.ToInt32(row["Quantity"]),
+                            Total = Convert.ToDecimal(row["Total"]),
+                            CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                            ProductCode = row["ProductCode"]?.ToString() ?? "",
+                            ProductDescription = row["ProductDescription"]?.ToString() ?? "",
+                            Category = row["Category"]?.ToString() ?? "",
+                            Rating = row["Rating"] != DBNull.Value ? Convert.ToDecimal(row["Rating"]) : 0,
+                            Offer = row["Offer"]?.ToString() ?? "",
+                            InStock = row["InStock"] != DBNull.Value ? Convert.ToBoolean(row["InStock"]) : false,
+                            BestSeller = row["BestSeller"] != DBNull.Value ? Convert.ToBoolean(row["BestSeller"]) : false
+                        });
+                    }
+                }
+
+                // Process order status history (third result set)
+                if (result.Tables.Count > 2 && result.Tables[2].Rows.Count > 0)
+                {
+                    orderResponse.StatusHistory = new List<Model.Order.OrderStatusHistoryInfo>();
+                    foreach (DataRow row in result.Tables[2].Rows)
+                    {
+                        orderResponse.StatusHistory.Add(new Model.Order.OrderStatusHistoryInfo
+                        {
+                            StatusHistoryId = Convert.ToInt64(row["StatusHistoryId"]),
+                            PreviousStatus = row["PreviousStatus"]?.ToString() ?? "",
+                            NewStatus = row["NewStatus"]?.ToString() ?? "",
+                            StatusNote = row["StatusNote"]?.ToString() ?? "",
+                            ChangedBy = Convert.ToInt64(row["ChangedBy"]),
+                            ChangedByName = row["ChangedByName"]?.ToString() ?? "",
+                            ChangedAt = Convert.ToDateTime(row["ChangedAt"])
+                        });
+                    }
+                }
+
+                // Process order tracking information (fourth result set)
+                if (result.Tables.Count > 3 && result.Tables[3].Rows.Count > 0)
+                {
+                    orderResponse.TrackingInfo = new List<Model.Order.OrderTrackingInfo>();
+                    foreach (DataRow row in result.Tables[3].Rows)
+                    {
+                        orderResponse.TrackingInfo.Add(new Model.Order.OrderTrackingInfo
+                        {
+                            TrackingId = Convert.ToInt64(row["TrackingId"]),
+                            TrackingNumber = row["TrackingNumber"]?.ToString() ?? "",
+                            Carrier = row["Carrier"]?.ToString() ?? "",
+                            TrackingStatus = row["TrackingStatus"]?.ToString() ?? "",
+                            EstimatedDelivery = row["EstimatedDelivery"] != DBNull.Value ? Convert.ToDateTime(row["EstimatedDelivery"]) : null,
+                            ActualDelivery = row["ActualDelivery"] != DBNull.Value ? Convert.ToDateTime(row["ActualDelivery"]) : null,
+                            TrackingUrl = row["TrackingUrl"]?.ToString() ?? "",
+                            CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                            UpdatedAt = Convert.ToDateTime(row["UpdatedAt"])
+                        });
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Get order by ID successful for user {request.UserId}, order {request.OrderId}");
+
+                return orderResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Get order by ID error for user {request.UserId}, order {request.OrderId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("Order not found or does not belong to user"))
+                {
+                    throw new KeyNotFoundException("Order not found or does not belong to user");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Cancel an order
+        /// </summary>
+        /// <param name="request">Cancel order request</param>
+        /// <returns>Order cancellation confirmation</returns>
+        public async Task<Model.Order.CancelOrderResponse> CancelOrder(Model.Order.CancelOrderRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Cancel order for user {request.UserId}, order {request.OrderId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "OrderId", request.OrderId },
+                    { "UserId", request.UserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "CancelReason", request.CancelReason ?? (object)DBNull.Value },
+                    { "CancelledBy", request.CancelledBy ?? (object)DBNull.Value },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_CANCEL_ORDER,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Order not found or does not belong to user");
+                }
+
+                // Process cancellation result (first result set)
+                var cancelRow = result.Tables[0].Rows[0];
+                var cancelResponse = new Model.Order.CancelOrderResponse
+                {
+                    OrderId = Convert.ToInt64(cancelRow["OrderId"]),
+                    OrderNumber = cancelRow["OrderNumber"]?.ToString() ?? "",
+                    UserId = Convert.ToInt64(cancelRow["UserId"]),
+                    PreviousStatus = cancelRow["PreviousStatus"]?.ToString() ?? "",
+                    NewStatus = cancelRow["NewStatus"]?.ToString() ?? "",
+                    RefundAmount = Convert.ToDecimal(cancelRow["RefundAmount"]),
+                    CancelReason = cancelRow["CancelReason"]?.ToString() ?? "",
+                    Message = cancelRow["Message"]?.ToString() ?? "Order cancelled successfully",
+                    CancelledDate = Convert.ToDateTime(cancelRow["CancelledDate"]),
+                    RefundInitiated = Convert.ToBoolean(cancelRow["RefundInitiated"]),
+                    Success = true
+                };
+
+                this.Logger.LogInformation($"Repository: Cancel order successful for user {request.UserId}, order {request.OrderId}");
+
+                return cancelResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Cancel order error for user {request.UserId}, order {request.OrderId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("Order not found or does not belong to user"))
+                {
+                    throw new KeyNotFoundException("Order not found or does not belong to user");
+                }
+                else if (ex.Message.Contains("Order cannot be cancelled in current status"))
+                {
+                    throw new InvalidOperationException(ex.Message);
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update order status
+        /// </summary>
+        /// <param name="request">Update order status request</param>
+        /// <returns>Order status update confirmation</returns>
+        public async Task<Model.Order.UpdateOrderStatusResponse> UpdateOrderStatus(Model.Order.UpdateOrderStatusRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Update order status for order {request.OrderId} to {request.Status}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "OrderId", request.OrderId },
+                    { "UserId", request.UserId ?? (object)DBNull.Value },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "NewStatus", request.Status },
+                    { "StatusNote", request.Note ?? (object)DBNull.Value },
+                    { "TrackingNumber", request.TrackingNumber ?? (object)DBNull.Value },
+                    { "Carrier", request.Carrier ?? (object)DBNull.Value },
+                    { "EstimatedDelivery", request.EstimatedDelivery ?? (object)DBNull.Value },
+                    { "UpdatedBy", request.UpdatedBy ?? (object)DBNull.Value },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_UPDATE_ORDER_STATUS,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Order not found or access denied");
+                }
+
+                // Process status update result (first result set)
+                var statusRow = result.Tables[0].Rows[0];
+                var statusResponse = new Model.Order.UpdateOrderStatusResponse
+                {
+                    OrderId = Convert.ToInt64(statusRow["OrderId"]),
+                    OrderNumber = statusRow["OrderNumber"]?.ToString() ?? "",
+                    UserId = Convert.ToInt64(statusRow["UserId"]),
+                    PreviousStatus = statusRow["PreviousStatus"]?.ToString() ?? "",
+                    NewStatus = statusRow["NewStatus"]?.ToString() ?? "",
+                    TrackingNumber = statusRow["TrackingNumber"]?.ToString() ?? "",
+                    Carrier = statusRow["Carrier"]?.ToString() ?? "",
+                    EstimatedDelivery = statusRow["EstimatedDelivery"] != DBNull.Value ? Convert.ToDateTime(statusRow["EstimatedDelivery"]) : null,
+                    StatusNote = statusRow["StatusNote"]?.ToString() ?? "",
+                    Message = statusRow["Message"]?.ToString() ?? "Order status updated successfully",
+                    UpdatedDate = Convert.ToDateTime(statusRow["UpdatedDate"]),
+                    Success = true
+                };
+
+                // Process tracking information (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var trackingRow = result.Tables[1].Rows[0];
+                    statusResponse.TrackingInfo = new Model.Order.OrderTrackingInfo
+                    {
+                        TrackingId = Convert.ToInt64(trackingRow["TrackingId"]),
+                        TrackingNumber = trackingRow["TrackingNumber"]?.ToString() ?? "",
+                        Carrier = trackingRow["Carrier"]?.ToString() ?? "",
+                        TrackingStatus = trackingRow["TrackingStatus"]?.ToString() ?? "",
+                        EstimatedDelivery = trackingRow["EstimatedDelivery"] != DBNull.Value ? Convert.ToDateTime(trackingRow["EstimatedDelivery"]) : null,
+                        ActualDelivery = trackingRow["ActualDelivery"] != DBNull.Value ? Convert.ToDateTime(trackingRow["ActualDelivery"]) : null,
+                        TrackingUrl = trackingRow["TrackingUrl"]?.ToString() ?? "",
+                        CreatedAt = Convert.ToDateTime(trackingRow["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(trackingRow["UpdatedAt"])
+                    };
+                }
+
+                this.Logger.LogInformation($"Repository: Update order status successful for order {request.OrderId} to {request.Status}");
+
+                return statusResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Update order status error for order {request.OrderId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new KeyNotFoundException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("Order not found or access denied"))
+                {
+                    throw new KeyNotFoundException("Order not found or access denied");
+                }
+                else if (ex.Message.Contains("Invalid status transition"))
+                {
+                    throw new InvalidOperationException(ex.Message);
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get all users (Admin only)
+        /// </summary>
+        /// <param name="request">Get all users request</param>
+        /// <returns>Users list with pagination</returns>
+        public async Task<Model.Admin.GetAllUsersResponse> GetAllUsers(Model.Admin.GetAllUsersRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Admin get all users by admin {request.AdminUserId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "AdminUserId", request.AdminUserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "Page", request.Page },
+                    { "Limit", request.Limit },
+                    { "Search", request.Search ?? (object)DBNull.Value },
+                    { "Role", request.Role ?? (object)DBNull.Value },
+                    { "Status", request.Status ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_ADMIN_GET_ALL_USERS,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0)
+                {
+                    throw new UnauthorizedAccessException("Admin user not found or insufficient privileges");
+                }
+
+                var usersResponse = new Model.Admin.GetAllUsersResponse();
+
+                // Process users (first result set)
+                if (result.Tables[0].Rows.Count > 0)
+                {
+                    var usersList = new List<Model.Admin.AdminUserInfo>();
+                    var paginationInfo = new Model.Order.PaginationInfo();
+
+                    foreach (DataRow row in result.Tables[0].Rows)
+                    {
+                        var user = new Model.Admin.AdminUserInfo
+                        {
+                            Id = row["Id"]?.ToString() ?? "",
+                            Name = row["Name"]?.ToString() ?? "",
+                            Email = row["Email"]?.ToString() ?? "",
+                            Phone = row["Phone"]?.ToString() ?? "",
+                            Role = row["Role"]?.ToString() ?? "",
+                            EmailVerified = Convert.ToBoolean(row["EmailVerified"]),
+                            PhoneVerified = Convert.ToBoolean(row["PhoneVerified"]),
+                            Status = row["Status"]?.ToString() ?? "",
+                            CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                            LastLogin = row["LastLogin"] != DBNull.Value ? Convert.ToDateTime(row["LastLogin"]) : null,
+                            OrderCount = Convert.ToInt32(row["OrderCount"]),
+                            TotalSpent = Convert.ToDecimal(row["TotalSpent"]),
+                            LastOrderDate = row["LastOrderDate"] != DBNull.Value ? Convert.ToDateTime(row["LastOrderDate"]) : null,
+                            TenantId = row["TenantId"] != DBNull.Value ? Convert.ToInt64(row["TenantId"]) : null,
+                            DateOfBirth = row["DateOfBirth"] != DBNull.Value ? Convert.ToDateTime(row["DateOfBirth"]) : null,
+                            Gender = row["Gender"]?.ToString() ?? "",
+                            Country = row["Country"]?.ToString() ?? "",
+                            City = row["City"]?.ToString() ?? "",
+                            State = row["State"]?.ToString() ?? "",
+                            PostalCode = row["PostalCode"]?.ToString() ?? "",
+                            CompanyName = row["CompanyName"]?.ToString() ?? "",
+                            JobTitle = row["JobTitle"]?.ToString() ?? ""
+                        };
+
+                        usersList.Add(user);
+
+                        // Set pagination info (same for all rows)
+                        if (paginationInfo.Total == 0)
+                        {
+                            paginationInfo.Page = Convert.ToInt32(row["CurrentPage"]);
+                            paginationInfo.Limit = Convert.ToInt32(row["PageSize"]);
+                            paginationInfo.Total = Convert.ToInt32(row["TotalCount"]);
+                            paginationInfo.TotalPages = Convert.ToInt32(row["TotalPages"]);
+                            paginationInfo.HasNext = Convert.ToBoolean(row["HasNext"]);
+                            paginationInfo.HasPrevious = Convert.ToBoolean(row["HasPrevious"]);
+                        }
+                    }
+
+                    usersResponse.Users = usersList;
+                    usersResponse.Pagination = paginationInfo;
+                }
+
+                // Process user permissions (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var userPermissionsDict = new Dictionary<string, List<Model.Admin.UserPermissionInfo>>();
+
+                    foreach (DataRow row in result.Tables[1].Rows)
+                    {
+                        var userId = row["UserId"]?.ToString() ?? "";
+                        var permission = new Model.Admin.UserPermissionInfo
+                        {
+                            PermissionName = row["PermissionName"]?.ToString() ?? "",
+                            PermissionDescription = row["PermissionDescription"]?.ToString() ?? "",
+                            PermissionSource = "Role-based" // Default for this result set
+                        };
+
+                        if (!userPermissionsDict.ContainsKey(userId))
+                        {
+                            userPermissionsDict[userId] = new List<Model.Admin.UserPermissionInfo>();
+                        }
+                        userPermissionsDict[userId].Add(permission);
+                    }
+
+                    // Assign permissions to their respective users
+                    foreach (var user in usersResponse.Users)
+                    {
+                        if (userPermissionsDict.ContainsKey(user.Id))
+                        {
+                            user.Permissions = userPermissionsDict[user.Id];
+                        }
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Admin get all users successful by admin {request.AdminUserId}, found {usersResponse.Users.Count} users");
+
+                return usersResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Admin get all users error by admin {request.AdminUserId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or insufficient privileges"))
+                {
+                    throw new UnauthorizedAccessException("User not found or insufficient privileges");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update user role (Admin only)
+        /// </summary>
+        /// <param name="request">Update user role request</param>
+        /// <returns>Role update confirmation</returns>
+        public async Task<Model.Admin.UpdateUserRoleResponse> UpdateUserRole(Model.Admin.UpdateUserRoleRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Admin update user role by admin {request.AdminUserId} for user {request.UserId} to {request.Role}");
+
+                // Convert permissions list to JSON if provided
+                string permissionsJson = null;
+                if (request.Permissions != null && request.Permissions.Any())
+                {
+                    permissionsJson = System.Text.Json.JsonSerializer.Serialize(request.Permissions);
+                }
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "AdminUserId", request.AdminUserId },
+                    { "UserId", request.UserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "RoleName", request.Role },
+                    { "Permissions", permissionsJson ?? (object)DBNull.Value },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_ADMIN_UPDATE_USER_ROLE,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Admin user not found or insufficient privileges");
+                }
+
+                // Process role update result (first result set)
+                var roleRow = result.Tables[0].Rows[0];
+                var roleResponse = new Model.Admin.UpdateUserRoleResponse
+                {
+                    UserId = Convert.ToInt64(roleRow["UserId"]),
+                    UserName = roleRow["UserName"]?.ToString() ?? "",
+                    PreviousRole = roleRow["PreviousRole"]?.ToString() ?? "",
+                    NewRole = roleRow["NewRole"]?.ToString() ?? "",
+                    UpdatedBy = Convert.ToInt64(roleRow["UpdatedBy"]),
+                    UpdatedAt = Convert.ToDateTime(roleRow["UpdatedAt"]),
+                    Message = roleRow["Message"]?.ToString() ?? "User role updated successfully",
+                    Success = true
+                };
+
+                // Process assigned permissions (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    roleResponse.AssignedPermissions = new List<Model.Admin.UserPermissionInfo>();
+                    foreach (DataRow row in result.Tables[1].Rows)
+                    {
+                        roleResponse.AssignedPermissions.Add(new Model.Admin.UserPermissionInfo
+                        {
+                            PermissionName = row["PermissionName"]?.ToString() ?? "",
+                            PermissionDescription = row["PermissionDescription"]?.ToString() ?? "",
+                            PermissionSource = row["PermissionSource"]?.ToString() ?? "Role-based"
+                        });
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Admin update user role successful by admin {request.AdminUserId} for user {request.UserId} to {request.Role}");
+
+                return roleResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Admin update user role error by admin {request.AdminUserId} for user {request.UserId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("Admin user not found or insufficient privileges"))
+                {
+                    throw new UnauthorizedAccessException("Admin user not found or insufficient privileges");
+                }
+                else if (ex.Message.Contains("Target user not found or inactive"))
+                {
+                    throw new KeyNotFoundException("Target user not found or inactive");
+                }
+                else if (ex.Message.Contains("Role not found"))
+                {
+                    throw new ArgumentException(ex.Message);
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get all orders (Admin only)
+        /// </summary>
+        /// <param name="request">Get all orders request</param>
+        /// <returns>Orders list with pagination and statistics</returns>
+        public async Task<Model.Admin.GetAllOrdersResponse> GetAllOrders(Model.Admin.GetAllOrdersRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Admin get all orders by admin {request.AdminUserId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "AdminUserId", request.AdminUserId },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "Page", request.Page },
+                    { "Limit", request.Limit },
+                    { "Status", request.Status ?? (object)DBNull.Value },
+                    { "Search", request.Search ?? (object)DBNull.Value },
+                    { "StartDate", request.StartDate ?? (object)DBNull.Value },
+                    { "EndDate", request.EndDate ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_ADMIN_GET_ALL_ORDERS,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0)
+                {
+                    throw new UnauthorizedAccessException("Admin user not found or insufficient privileges");
+                }
+
+                var ordersResponse = new Model.Admin.GetAllOrdersResponse();
+
+                // Process orders (first result set)
+                if (result.Tables[0].Rows.Count > 0)
+                {
+                    var ordersList = new List<Model.Admin.AdminOrderInfo>();
+                    var paginationInfo = new Model.Order.PaginationInfo();
+
+                    foreach (DataRow row in result.Tables[0].Rows)
+                    {
+                        var order = new Model.Admin.AdminOrderInfo
+                        {
+                            OrderId = row["OrderId"]?.ToString() ?? "",
+                            OrderNumber = row["OrderNumber"]?.ToString() ?? "",
+                            CustomerName = row["CustomerName"]?.ToString() ?? "",
+                            CustomerEmail = row["CustomerEmail"]?.ToString() ?? "",
+                            CustomerPhone = row["CustomerPhone"]?.ToString() ?? "",
+                            Status = row["Status"]?.ToString() ?? "",
+                            PaymentStatus = row["PaymentStatus"]?.ToString() ?? "",
+                            Total = Convert.ToDecimal(row["Total"]),
+                            Subtotal = Convert.ToDecimal(row["Subtotal"]),
+                            ShippingAmount = Convert.ToDecimal(row["ShippingAmount"]),
+                            TaxAmount = Convert.ToDecimal(row["TaxAmount"]),
+                            DiscountAmount = Convert.ToDecimal(row["DiscountAmount"]),
+                            ItemCount = Convert.ToInt32(row["ItemCount"]),
+                            TotalQuantity = Convert.ToInt32(row["TotalQuantity"]),
+                            CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                            UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                            ShippedAt = row["ShippedAt"] != DBNull.Value ? Convert.ToDateTime(row["ShippedAt"]) : null,
+                            DeliveredAt = row["DeliveredAt"] != DBNull.Value ? Convert.ToDateTime(row["DeliveredAt"]) : null,
+                            EstimatedDelivery = row["EstimatedDelivery"] != DBNull.Value ? Convert.ToDateTime(row["EstimatedDelivery"]) : null,
+                            ShippingAddress = row["ShippingAddress"]?.ToString() ?? "",
+                            BillingAddress = row["BillingAddress"]?.ToString() ?? "",
+                            PaymentMethod = row["PaymentMethod"]?.ToString() ?? "",
+                            ShippingMethod = row["ShippingMethod"]?.ToString() ?? "",
+                            Notes = row["Notes"]?.ToString() ?? "",
+                            CustomerId = Convert.ToInt64(row["CustomerId"]),
+                            CustomerTenantId = row["CustomerTenantId"] != DBNull.Value ? Convert.ToInt64(row["CustomerTenantId"]) : null
+                        };
+
+                        ordersList.Add(order);
+
+                        // Set pagination info (same for all rows)
+                        if (paginationInfo.Total == 0)
+                        {
+                            paginationInfo.Page = Convert.ToInt32(row["CurrentPage"]);
+                            paginationInfo.Limit = Convert.ToInt32(row["PageSize"]);
+                            paginationInfo.Total = Convert.ToInt32(row["TotalCount"]);
+                            paginationInfo.TotalPages = Convert.ToInt32(row["TotalPages"]);
+                            paginationInfo.HasNext = Convert.ToBoolean(row["HasNext"]);
+                            paginationInfo.HasPrevious = Convert.ToBoolean(row["HasPrevious"]);
+                        }
+                    }
+
+                    ordersResponse.Orders = ordersList;
+                    ordersResponse.Pagination = paginationInfo;
+                }
+
+                // Process order items (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    var orderItemsDict = new Dictionary<string, List<Model.Admin.AdminOrderItemInfo>>();
+
+                    foreach (DataRow row in result.Tables[1].Rows)
+                    {
+                        var orderId = row["OrderId"]?.ToString() ?? "";
+                        var orderItem = new Model.Admin.AdminOrderItemInfo
+                        {
+                            OrderItemId = Convert.ToInt64(row["OrderItemId"]),
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            ProductName = row["ProductName"]?.ToString() ?? "",
+                            ProductImage = row["ProductImage"]?.ToString() ?? "",
+                            Price = Convert.ToDecimal(row["Price"]),
+                            Quantity = Convert.ToInt32(row["Quantity"]),
+                            Total = Convert.ToDecimal(row["Total"]),
+                            ProductCode = row["ProductCode"]?.ToString() ?? "",
+                            Category = row["Category"]?.ToString() ?? "",
+                            Rating = row["Rating"] != DBNull.Value ? Convert.ToDecimal(row["Rating"]) : 0,
+                            Offer = row["Offer"]?.ToString() ?? ""
+                        };
+
+                        if (!orderItemsDict.ContainsKey(orderId))
+                        {
+                            orderItemsDict[orderId] = new List<Model.Admin.AdminOrderItemInfo>();
+                        }
+                        orderItemsDict[orderId].Add(orderItem);
+                    }
+
+                    // Assign items to their respective orders
+                    foreach (var order in ordersResponse.Orders)
+                    {
+                        if (orderItemsDict.ContainsKey(order.OrderId))
+                        {
+                            order.Items = orderItemsDict[order.OrderId];
+                        }
+                    }
+                }
+
+                // Process order statistics (third result set)
+                if (result.Tables.Count > 2 && result.Tables[2].Rows.Count > 0)
+                {
+                    var statsRow = result.Tables[2].Rows[0];
+                    ordersResponse.Statistics = new Model.Admin.OrderStatsSummary
+                    {
+                        TotalOrders = Convert.ToInt32(statsRow["TotalOrders"]),
+                        TotalRevenue = Convert.ToDecimal(statsRow["TotalRevenue"]),
+                        AverageOrderValue = Convert.ToDecimal(statsRow["AverageOrderValue"]),
+                        UniqueCustomers = Convert.ToInt32(statsRow["UniqueCustomers"]),
+                        PendingOrders = Convert.ToInt32(statsRow["PendingOrders"]),
+                        ProcessingOrders = Convert.ToInt32(statsRow["ProcessingOrders"]),
+                        ShippedOrders = Convert.ToInt32(statsRow["ShippedOrders"]),
+                        DeliveredOrders = Convert.ToInt32(statsRow["DeliveredOrders"]),
+                        CancelledOrders = Convert.ToInt32(statsRow["CancelledOrders"])
+                    };
+                }
+
+                this.Logger.LogInformation($"Repository: Admin get all orders successful by admin {request.AdminUserId}, found {ordersResponse.Orders.Count} orders");
+
+                return ordersResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Admin get all orders error by admin {request.AdminUserId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("User not found or insufficient privileges"))
+                {
+                    throw new UnauthorizedAccessException("User not found or insufficient privileges");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Add multiple images to a product
+        /// </summary>
+        /// <param name="request">Add product images request</param>
+        /// <param name="imageDataList">List of processed image data</param>
+        /// <returns>List of added images</returns>
+        public async Task<Model.Product.AddProductImagesResponse> AddProductImages(Model.Product.AddProductImagesRequest request, List<Model.Product.ImageUploadData> imageDataList)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Add product images for product {request.ProductId}, count: {imageDataList.Count}");
+
+                // Convert image data list to JSON for stored procedure
+                string imagesJson = System.Text.Json.JsonSerializer.Serialize(imageDataList);
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "ProductId", request.ProductId },
+                    { "UserId", request.UserId ?? (object)DBNull.Value },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "Images", imagesJson },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_ADD_PRODUCT_IMAGES,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Product not found or no images were added");
+                }
+
+                // Process added images (first result set)
+                var addedImages = new List<Model.Product.ProductImageInfo>();
+                foreach (DataRow row in result.Tables[0].Rows)
+                {
+                    addedImages.Add(new Model.Product.ProductImageInfo
+                    {
+                        ImageId = Convert.ToInt64(row["ImageId"]),
+                        ProductId = Convert.ToInt64(row["ProductId"]),
+                        Poster = row["Poster"]?.ToString() ?? "",
+                        Main = Convert.ToBoolean(row["Main"]),
+                        Active = Convert.ToBoolean(row["Active"]),
+                        OrderBy = Convert.ToInt32(row["OrderBy"]),
+                        Created = Convert.ToDateTime(row["Created"]),
+                        Modified = Convert.ToDateTime(row["Modified"]),
+                        ImageName = row["ImageName"]?.ToString() ?? "",
+                        ContentType = row["ContentType"]?.ToString() ?? "",
+                        FileSize = Convert.ToInt64(row["FileSize"])
+                    });
+                }
+
+                var response = new Model.Product.AddProductImagesResponse
+                {
+                    Images = addedImages,
+                    TotalAdded = addedImages.Count,
+                    Message = $"Successfully added {addedImages.Count} images to product",
+                    Success = true
+                };
+
+                this.Logger.LogInformation($"Repository: Add product images successful for product {request.ProductId}, added: {addedImages.Count}");
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Add product images error for product {request.ProductId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("Product not found or inactive"))
+                {
+                    throw new KeyNotFoundException("Product not found or inactive");
+                }
+                else if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new ArgumentException("User not found or inactive");
+                }
+                else if (ex.Message.Contains("At least one image is required"))
+                {
+                    throw new ArgumentException("At least one image is required");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update product image properties
+        /// </summary>
+        /// <param name="request">Update product image request</param>
+        /// <returns>Updated image information</returns>
+        public async Task<Model.Product.UpdateProductImageResponse> UpdateProductImage(Model.Product.UpdateProductImageRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Update product image for product {request.ProductId}, image {request.ImageId}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "ProductId", request.ProductId },
+                    { "ImageId", request.ImageId },
+                    { "UserId", request.UserId ?? (object)DBNull.Value },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "IsMain", request.Main ?? (object)DBNull.Value },
+                    { "Active", request.Active ?? (object)DBNull.Value },
+                    { "OrderBy", request.OrderBy ?? (object)DBNull.Value },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_UPDATE_PRODUCT_IMAGE,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Product or image not found");
+                }
+
+                // Process updated image (first result set)
+                var imageRow = result.Tables[0].Rows[0];
+                var updatedImage = new Model.Product.ProductImageInfo
+                {
+                    ImageId = Convert.ToInt64(imageRow["ImageId"]),
+                    ProductId = Convert.ToInt64(imageRow["ProductId"]),
+                    Poster = imageRow["Poster"]?.ToString() ?? "",
+                    Main = Convert.ToBoolean(imageRow["Main"]),
+                    Active = Convert.ToBoolean(imageRow["Active"]),
+                    OrderBy = Convert.ToInt32(imageRow["OrderBy"]),
+                    Created = Convert.ToDateTime(imageRow["Created"]),
+                    Modified = Convert.ToDateTime(imageRow["Modified"]),
+                    ImageName = imageRow["ImageName"]?.ToString() ?? "",
+                    ContentType = imageRow["ContentType"]?.ToString() ?? "",
+                    FileSize = Convert.ToInt64(imageRow["FileSize"])
+                };
+
+                var response = new Model.Product.UpdateProductImageResponse
+                {
+                    Image = updatedImage,
+                    Message = imageRow["Message"]?.ToString() ?? "Image updated successfully",
+                    Success = true
+                };
+
+                this.Logger.LogInformation($"Repository: Update product image successful for product {request.ProductId}, image {request.ImageId}");
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Update product image error for product {request.ProductId}, image {request.ImageId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("Product not found or inactive"))
+                {
+                    throw new KeyNotFoundException("Product not found or inactive");
+                }
+                else if (ex.Message.Contains("Image not found or does not belong to this product"))
+                {
+                    throw new KeyNotFoundException("Image not found or does not belong to this product");
+                }
+                else if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new ArgumentException("User not found or inactive");
+                }
+                
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Delete product image
+        /// </summary>
+        /// <param name="request">Delete product image request</param>
+        /// <returns>Deletion confirmation and remaining images</returns>
+        public async Task<Model.Product.DeleteProductImageResponse> DeleteProductImage(Model.Product.DeleteProductImageRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Repository: Delete product image for product {request.ProductId}, image {request.ImageId}, hard: {request.HardDelete}");
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "ProductId", request.ProductId },
+                    { "ImageId", request.ImageId },
+                    { "UserId", request.UserId ?? (object)DBNull.Value },
+                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
+                    { "HardDelete", request.HardDelete },
+                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
+                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
+                };
+
+                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                    Model.Constant.Constant.StoredProcedures.SP_DELETE_PRODUCT_IMAGE,
+                    parameters
+                ));
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                {
+                    throw new KeyNotFoundException("Product or image not found");
+                }
+
+                // Process deletion result (first result set)
+                var deleteRow = result.Tables[0].Rows[0];
+                var deleteResponse = new Model.Product.DeleteProductImageResponse
+                {
+                    ImageId = Convert.ToInt64(deleteRow["ImageId"]),
+                    ProductId = Convert.ToInt64(deleteRow["ProductId"]),
+                    ImageName = deleteRow["ImageName"]?.ToString() ?? "",
+                    WasMain = Convert.ToBoolean(deleteRow["WasMain"]),
+                    HardDeleted = Convert.ToBoolean(deleteRow["HardDeleted"]),
+                    DeletedAt = Convert.ToDateTime(deleteRow["DeletedAt"]),
+                    DeletedBy = deleteRow["DeletedBy"] != DBNull.Value ? Convert.ToInt64(deleteRow["DeletedBy"]) : null,
+                    RemainingActiveImages = Convert.ToInt32(deleteRow["RemainingActiveImages"]),
+                    Message = deleteRow["Message"]?.ToString() ?? "Image deleted successfully",
+                    Success = true
+                };
+
+                // Process remaining images (second result set)
+                if (result.Tables.Count > 1 && result.Tables[1].Rows.Count > 0)
+                {
+                    deleteResponse.RemainingImages = new List<Model.Product.ProductImageInfo>();
+                    foreach (DataRow row in result.Tables[1].Rows)
+                    {
+                        deleteResponse.RemainingImages.Add(new Model.Product.ProductImageInfo
+                        {
+                            ImageId = Convert.ToInt64(row["ImageId"]),
+                            ProductId = Convert.ToInt64(row["ProductId"]),
+                            Poster = row["Poster"]?.ToString() ?? "",
+                            Main = Convert.ToBoolean(row["Main"]),
+                            Active = Convert.ToBoolean(row["Active"]),
+                            OrderBy = Convert.ToInt32(row["OrderBy"]),
+                            Created = Convert.ToDateTime(row["Created"]),
+                            Modified = Convert.ToDateTime(row["Modified"])
+                        });
+                    }
+                }
+
+                this.Logger.LogInformation($"Repository: Delete product image successful for product {request.ProductId}, image {request.ImageId}");
+
+                return deleteResponse;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError($"Repository: Delete product image error for product {request.ProductId}, image {request.ImageId}: {ex.Message}");
+                
+                // Check for specific error messages from stored procedure
+                if (ex.Message.Contains("Product not found or inactive"))
+                {
+                    throw new KeyNotFoundException("Product not found or inactive");
+                }
+                else if (ex.Message.Contains("Image not found or does not belong to this product"))
+                {
+                    throw new KeyNotFoundException("Image not found or does not belong to this product");
+                }
+                else if (ex.Message.Contains("Cannot delete the last active main image"))
+                {
+                    throw new InvalidOperationException("Cannot delete the last active main image. Please add another image first.");
+                }
+                else if (ex.Message.Contains("Image is already deleted"))
+                {
+                    throw new InvalidOperationException("Image is already deleted");
+                }
+                else if (ex.Message.Contains("User not found or inactive"))
+                {
+                    throw new ArgumentException("User not found or inactive");
+                }
+                
+                throw;
+            }
+        }
+
         #endregion
     }
 }

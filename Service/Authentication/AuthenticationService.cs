@@ -9,7 +9,6 @@ using Tenant.API.Base.Repository;
 using Tenant.API.Base.Service;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
-using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Http;
@@ -54,7 +53,10 @@ namespace Tenant.Query.Service.Authentication
                 new Claim(API.Base.Core.Constant.Jwt.CLAIM_LOCATION_ID, validationContext.LocationId)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["Jwt:Key"]))
+            {
+                KeyId = "your-key-id" // Set your key ID here
+            };
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(this.Configuration["Jwt:Issuer"],

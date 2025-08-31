@@ -73,6 +73,301 @@ namespace Tenant.Query.Service.User
                 throw ex;
             }
         }
+
+        /// <summary>
+        /// Authenticate user login
+        /// </summary>
+        /// <param name="request">Login request</param>
+        /// <returns>Login response with user information</returns>
+        public async Task<Model.User.LoginResponse> Login(Model.User.LoginRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Login attempt for: {request.EmailOrPhone}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (string.IsNullOrWhiteSpace(request.EmailOrPhone))
+                    throw new ArgumentException("Email or phone is required");
+
+                if (string.IsNullOrWhiteSpace(request.Password))
+                    throw new ArgumentException("Password is required");
+
+                // Call repository to authenticate user
+                var loginResponse = await this.UserRepository.Login(request);
+
+                this.Logger.LogInformation($"Login successful for user: {loginResponse.UserId}");
+
+                return loginResponse;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                this.Logger.LogWarning($"Invalid login attempt for: {request?.EmailOrPhone}");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this.Logger.LogWarning($"Account locked for: {request?.EmailOrPhone}");
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                this.Logger.LogError($"Login Error for {request?.EmailOrPhone}: {ex.Message}");
+                throw new System.Exception("An error occurred during login.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Register a new user
+        /// </summary>
+        /// <param name="request">Registration request</param>
+        /// <returns>Registration response with user information and token</returns>
+        public async Task<Model.User.RegisterResponse> Register(Model.User.RegisterRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Registration attempt for: {request.Email}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (string.IsNullOrWhiteSpace(request.Name))
+                    throw new ArgumentException("Name is required");
+
+                if (string.IsNullOrWhiteSpace(request.Email))
+                    throw new ArgumentException("Email is required");
+
+                if (string.IsNullOrWhiteSpace(request.Phone))
+                    throw new ArgumentException("Phone is required");
+
+                if (string.IsNullOrWhiteSpace(request.Password))
+                    throw new ArgumentException("Password is required");
+
+                if (request.Password != request.ConfirmPassword)
+                    throw new ArgumentException("Passwords do not match");
+
+                if (!request.AgreeToTerms)
+                    throw new ArgumentException("You must agree to the terms and conditions");
+
+                // Call repository to register user
+                var registerResponse = await this.UserRepository.Register(request);
+
+                this.Logger.LogInformation($"Registration successful for user: {registerResponse.User.UserId}");
+
+                return registerResponse;
+            }
+            catch (InvalidOperationException)
+            {
+                this.Logger.LogWarning($"Registration failed - email or phone already exists: {request?.Email}");
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                this.Logger.LogError($"Registration Error for {request?.Email}: {ex.Message}");
+                throw new System.Exception("An error occurred during registration.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Logout user and invalidate tokens
+        /// </summary>
+        /// <param name="request">Logout request</param>
+        /// <returns>Logout confirmation message</returns>
+        public async Task<string> Logout(Model.User.LogoutRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Logout attempt for user: {request.UserId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                // Call repository to logout user
+                var logoutMessage = await this.UserRepository.Logout(request);
+
+                this.Logger.LogInformation($"Logout successful for user: {request.UserId}");
+
+                return logoutMessage;
+            }
+            catch (KeyNotFoundException)
+            {
+                this.Logger.LogWarning($"Logout failed - user not found: {request?.UserId}");
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                this.Logger.LogError($"Logout Error for user {request?.UserId}: {ex.Message}");
+                throw new System.Exception("An error occurred during logout.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get user profile information
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <param name="tenantId">Optional tenant ID for validation</param>
+        /// <returns>User profile response</returns>
+        public async Task<Model.User.UserProfileResponse> GetUserProfile(long userId, long? tenantId = null)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Get profile attempt for user: {userId}");
+
+                if (userId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                // Call repository to get user profile
+                var profileData = await this.UserRepository.GetUserProfile(userId, tenantId);
+
+                var response = new Model.User.UserProfileResponse
+                {
+                    Success = true,
+                    Data = profileData,
+                    Message = "Profile retrieved successfully"
+                };
+
+                this.Logger.LogInformation($"Profile retrieval successful for user: {userId}");
+
+                return response;
+            }
+            catch (KeyNotFoundException)
+            {
+                this.Logger.LogWarning($"Profile retrieval failed - user not found: {userId}");
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                this.Logger.LogError($"Profile retrieval error for user {userId}: {ex.Message}");
+                throw new System.Exception("An error occurred while retrieving the user profile.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Update user profile information
+        /// </summary>
+        /// <param name="request">Profile update request</param>
+        /// <returns>Success confirmation message</returns>
+        public async Task<string> UpdateProfile(Model.User.UpdateProfileRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Profile update attempt for user: {request.UserId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                // Validate date of birth if provided
+                if (request.DateOfBirth.HasValue && request.DateOfBirth.Value > DateTime.Now)
+                    throw new ArgumentException("Date of birth cannot be in the future");
+
+                // Validate age if date of birth is provided (must be at least 13 years old)
+                if (request.DateOfBirth.HasValue)
+                {
+                    var age = DateTime.Now.Year - request.DateOfBirth.Value.Year;
+                    if (DateTime.Now < request.DateOfBirth.Value.AddYears(age))
+                        age--;
+                    
+                    if (age < 13)
+                        throw new ArgumentException("User must be at least 13 years old");
+                }
+
+                // Call repository to update profile
+                var updateMessage = await this.UserRepository.UpdateProfile(request);
+
+                this.Logger.LogInformation($"Profile update successful for user: {request.UserId}");
+
+                return updateMessage;
+            }
+            catch (KeyNotFoundException)
+            {
+                this.Logger.LogWarning($"Profile update failed - user not found: {request?.UserId}");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this.Logger.LogWarning($"Profile update failed - phone already exists: {request?.Phone}");
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                this.Logger.LogError($"Profile update error for user {request?.UserId}: {ex.Message}");
+                throw new System.Exception("An error occurred while updating the profile.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Reset user password using reset token
+        /// </summary>
+        /// <param name="request">Password reset request</param>
+        /// <returns>Success confirmation message</returns>
+        public async Task<string> ResetPassword(Model.User.ResetPasswordRequest request)
+        {
+            try
+            {
+                this.Logger.LogInformation($"Password reset attempt for token: {request.ResetToken?.Substring(0, Math.Min(10, request.ResetToken?.Length ?? 0))}...");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (string.IsNullOrWhiteSpace(request.ResetToken))
+                    throw new ArgumentException("Reset token is required");
+
+                if (string.IsNullOrWhiteSpace(request.NewPassword))
+                    throw new ArgumentException("New password is required");
+
+                if (string.IsNullOrWhiteSpace(request.ConfirmPassword))
+                    throw new ArgumentException("Password confirmation is required");
+
+                if (request.NewPassword != request.ConfirmPassword)
+                    throw new ArgumentException("Password and confirmation password do not match");
+
+                // Additional password strength validation (complementing the regex validation)
+                if (request.NewPassword.Length < 8)
+                    throw new ArgumentException("Password must be at least 8 characters long");
+
+                if (request.NewPassword.Length > 255)
+                    throw new ArgumentException("Password cannot exceed 255 characters");
+
+                // Check for common weak passwords
+                var commonWeakPasswords = new[] 
+                {
+                    "password", "password123", "123456789", "qwerty123", "admin123",
+                    "welcome123", "letmein123", "password1", "123456", "qwerty"
+                };
+
+                if (commonWeakPasswords.Any(weak => request.NewPassword.ToLower().Contains(weak.ToLower())))
+                    throw new ArgumentException("Password contains common weak patterns. Please choose a stronger password");
+
+                // Call repository to reset password
+                var resetResponse = await this.UserRepository.ResetPassword(request);
+
+                this.Logger.LogInformation($"Password reset successful for user: {resetResponse.UserId}");
+
+                return resetResponse.Message;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                this.Logger.LogWarning($"Invalid or expired reset token used: {request?.ResetToken?.Substring(0, Math.Min(10, request?.ResetToken?.Length ?? 0))}...");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this.Logger.LogWarning($"Reset token already used: {request?.ResetToken?.Substring(0, Math.Min(10, request?.ResetToken?.Length ?? 0))}...");
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                this.Logger.LogError($"Password reset error for token {request?.ResetToken?.Substring(0, Math.Min(10, request?.ResetToken?.Length ?? 0))}...: {ex.Message}");
+                throw new System.Exception("An error occurred while resetting the password.", ex);
+            }
+        }
         #endregion
 
         #region old

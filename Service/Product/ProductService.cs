@@ -398,7 +398,7 @@ namespace Tenant.Query.Service.Product
                     return new List<ProductCartResponse>();
 
                 // Map the response to a list of ProductWishListResponse
-                foreach (var product in response)   
+                foreach (var product in response)
                 {
                     var wishListResponse = new ProductCartResponse
                     {
@@ -414,7 +414,7 @@ namespace Tenant.Query.Service.Product
                 }
 
                 return productWishListResponse;
-            }   
+            }
             catch (ArgumentNullException ex)
             {
                 throw new ArgumentException("Invalid argument provided.", ex);
@@ -452,7 +452,7 @@ namespace Tenant.Query.Service.Product
                 PageSize = 10,
                 Category = 0,
                 OrderBy = "ProductName,asc",
-                ProductId = productIds ,
+                ProductId = productIds,
                 RoleId = "1",
                 Search = ""
             };
@@ -499,7 +499,7 @@ namespace Tenant.Query.Service.Product
         /// <param name="dtProductCartResponse"></param>
         /// <param name="firstProduct"></param>
         /// <returns></returns>
-       private ProductWishListResponse MapProductWishList(WishListPayload payload, DataTable dtProductWishList, Model.Product.ProductItemList firstProduct)
+        private ProductWishListResponse MapProductWishList(WishListPayload payload, DataTable dtProductWishList, Model.Product.ProductItemList firstProduct)
         {
             return new ProductWishListResponse
             {
@@ -601,7 +601,7 @@ namespace Tenant.Query.Service.Product
                 throw;
             }
         }
-        
+
 
         /// <summary>
         /// GetProductList
@@ -660,174 +660,6 @@ namespace Tenant.Query.Service.Product
 
             return productItemList;
         }
-
-        //public void InsertCategory(string tenantId, Model.Response.Category category)
-        //{
-        //    // Logic to insert category into the database
-        //    // This could involve calling a repository method to save the category
-        //    try
-        //    {
-        //        // Assuming _productRepository is an instance of ProductRepository
-        //        this.productRepository.InsertCategory(tenantId, category);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Handle exceptions
-        //        throw new Exception("An error occurred while inserting the category", ex);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Get Product details by filter in sp route
-        ///// </summary>
-        ///// <param name="tenantId"></param>
-        ///// <param name="locationId"></param>
-        ///// <returns></returns>
-        //internal List<Model.Product.ProductMaster> GetProducts(string tenantId, Model.Product.Search search)
-        //{
-        //    try
-        //    {
-        //        this.Logger.LogInformation($"getting the the list of prduct detils by filter in sp route for ( tenant :{tenantId} )");
-
-        //        string spName = String.Empty;
-        //        List<Model.Product.ProductMaster> products = new List<Model.Product.ProductMaster>();
-
-        //        if (search.SubCategory == null)
-        //            search.SubCategory = new List<string>();
-        //        if (search.Category == null)
-        //            search.Category = new List<string>();
-
-        //        //product catalog sp name
-        //        spName = "XC_GET_PRODUCT_DETAILS";
-        //        //calling the product repository to get the list of prduct detils
-        //        products = this.productRepository.GetProductDtailsUsingSp(tenantId, spName, search);
-
-        //        return products;
-
-        //    }
-        //    catch (KeyNotFoundException ex)
-        //    {
-        //        throw ex;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="RestaurantGuid"></param>
-        ///// <param name="LocationGuid"></param>
-        ///// <returns></returns>
-        //public Model.Product.ProductMaster GetPartnerEventDetails(string RestaurantGuid, string LocationGuid)
-        //{
-        //    try
-        //    {
-        //        string spName = this.Configuration["StoredProcedure:GetPartnerEventDetail"];
-        //        var detail = this.productRepository.GetPartnerEventDetails(RestaurantGuid: RestaurantGuid, LocationGuid: LocationGuid, storeProcedureName: spName).Result;
-
-        //        if (detail == null)
-        //            this.Logger.LogWarning($"Called service : Partner detail not exists for Restaurant Guid {RestaurantGuid} and Location Guid {LocationGuid} ");
-        //        else
-        //            this.Logger.LogWarning($"Called service: Received partner detail for Restaurant Guid {RestaurantGuid} and Location Guid {LocationGuid} ");
-
-        //        return detail;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
-
-        //public List<Model.Product.ProductMaster> GetProductMaster(string tenantId, Model.Product.ProductPayload payload)
-        //{
-        //    try
-        //    {
-
-        //        string spName = Model.Constant.Constant.SA_GET_PRODUCTS_FOR_CATEGORY_MAPPING;
-
-        //        string[] filters = payload.OrderBy?.Split(',');
-        //        //string orderBy = string.IsNullOrEmpty(filters?.ElementAtOrDefault(0)) ? Constant.VendorName : filters[0];
-        //        //string order = string.IsNullOrEmpty(filters?.ElementAtOrDefault(1)) ? Constant.ASC : filters[1];
-
-        //        List<Model.Product.ProductMaster> response = this.productRepository.GetProductMaster(tenantId, payload, spName);
-
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw;
-        //    }
-        //}
-
-
-        #endregion
-
-
-        #region Examples
-        //private static void MapInvoiceTenantVendor(ProductMaster productMaster, DataRow row)
-        //{
-        //    productMaster.Id = GetColumnValue<long>(row, "tenant_vendor_id", 0);
-        //    productMaster.ProductName = GetColumnValue<string>(row, "tenant_vendor_name", string.Empty);
-        //    productMaster.Active = GetColumnValue<bool>(row, "default_invoice_id_as_invoice_date", false);
-        //}
-
-
-
-        //internal List<Model.Product.ProductMaster> GetProductMaster(string tenantId, PorductFilter filter)
-        //{
-        //    try
-        //    {
-        //        //Local variable
-        //        List<Model.Product.ProductMaster> productMaster = new List<ProductMaster>();
-
-        //        //Get Invoice aggregate
-        //        productMaster = this.productRepository.GetProductMaster(tenantId, filter).Result;
-
-        //        //Return
-        //        return productMaster;
-        //    }
-        //    catch (KeyNotFoundException ex)
-        //    {
-        //        throw ex;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
-
-        //public List<Model.Response.MenuMaster.MenuMaster> GetMenuMaster()
-        //{
-        //    List<Model.Response.MenuMaster.MenuMaster> menu = (List<Model.Response.MenuMaster.MenuMaster>)Newtonsoft.Json.JsonConvert.DeserializeObject("[ { \"menuId\": 1, \"menuName\": \"Home\", \"orderBy\": 1, \"active\": true, \"image\": \"\", \"subMenu\": false, \"category\": [], \"link\": \"/\" }, { \"menuId\": 2, \"menuName\": \"Seed\", \"orderBy\": 2, \"active\": true, \"image\": \"\", \"subMenu\": true, \"category\": [ { \"categoryId\": 1, \"category\": \"All Seed\", \"active\": true }, { \"categoryId\": 2, \"category\": \"Vegetable\", \"active\": true }, { \"categoryId\": 3, \"category\": \"Herbal\", \"active\": true }, { \"categoryId\": 4, \"category\": \"Fruits\", \"active\": true }, { \"categoryId\": 5, \"category\": \"Greens\", \"active\": true } ] }, { \"menuId\": 3, \"menuName\": \"Plants\", \"orderBy\": 3, \"active\": true, \"image\": \"\", \"subMenu\": true, \"category\": [ { \"categoryId\": 1, \"category\": \"All Plants\", \"active\": true }, { \"categoryId\": 2, \"category\": \"Indoor\", \"active\": true }, { \"categoryId\": 3, \"category\": \"Outdoor\", \"active\": true }, { \"categoryId\": 4, \"category\": \"New Arrivals\", \"active\": true }, { \"categoryId\": 5, \"category\": \"Air Furify\", \"active\": true } ] }, { \"menuId\": 4, \"menuName\": \"Contact Us\", \"orderBy\": 4, \"active\": true, \"link\": \"/contactus\", \"image\": \"\", \"subMenu\": false } ]", typeof(List<Model.Response.MenuMaster.MenuMaster>));
-
-        //    return menu.OrderBy(x => x.orderBy).ToList();
-        //}
-
-        //public List<Model.Response.ProductMaster.ProductMaster> GetProductMaster()
-        //{
-        //    List<Model.Response.ProductMaster.ProductMaster> menu = (List<Model.Response.ProductMaster.ProductMaster>)Newtonsoft.Json.JsonConvert.DeserializeObject("[\r\n        {\r\n            \"productId\": 1001,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Apple\",\r\n            \"productDescription\": \"Apple\",\r\n            \"productCode\": \"SD101\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 10,\r\n            \"total\": 100,\r\n            \"price\": 200,\r\n            \"category\": 1,\r\n            \"rating\": 2,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 15,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1002,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Orange\",\r\n            \"productDescription\": \"Orange\",\r\n            \"productCode\": \"OR1O1\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 100,\r\n            \"total\": 100,\r\n            \"price\": 200,\r\n            \"category\": 2,\r\n            \"rating\": 3,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 1,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 1,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1580894894513-541e068a3e2b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"orderBy\": 1,\r\n                    \"main\" : true,\r\n                    \"active\":true\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1003,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Graps\",\r\n            \"productDescription\": \"Graps\",\r\n            \"productCode\": \"DR101\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 200,\r\n            \"total\": 200,\r\n            \"price\": 200,\r\n            \"category\": 2,\r\n            \"rating\": 1,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 2,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1523726491678-bf852e717f6a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1004,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Givi\",\r\n            \"productDescription\": \"Givi\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 400,\r\n            \"total\": 400,\r\n            \"price\": 400,\r\n            \"category\": 3,\r\n            \"rating\": 5,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 1,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"10%\",\r\n            \"orderBy\": 3,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1523726491678-bf852e717f6a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1005,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Gova\",\r\n            \"productDescription\": \"Gova\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 50,\r\n            \"total\": 50,\r\n            \"price\": 50,\r\n            \"category\": 1,\r\n            \"rating\": 3,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 1,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": false,\r\n            \"best_seller\": true,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"70%\",\r\n            \"orderBy\": 4,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1595617795501-9661aafda72a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1006,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Mango\",\r\n            \"productDescription\": \"Mango\",\r\n            \"productCode\": \"PRT100\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 60,\r\n            \"total\": 60,\r\n            \"price\": 60,\r\n            \"category\": 1,\r\n            \"rating\": 4,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": false,\r\n            \"best_seller\": true,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"80%\",\r\n            \"orderBy\": 5,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1639322537228-f710d846310a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1007,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"JackFruit\",\r\n            \"productDescription\": \"JackFruit\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 70,\r\n            \"total\": 70,\r\n            \"price\": 70,\r\n            \"category\": 1,\r\n            \"rating\": 1,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"20%\",\r\n            \"orderBy\": 6,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1522542550221-31fd19575a2d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1008,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Banana\",\r\n            \"productDescription\": \"Banana\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 80,\r\n            \"total\": 80,\r\n            \"price\": 80,\r\n            \"category\": 1,\r\n            \"rating\": 4,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"40%\",\r\n            \"orderBy\": 7,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1621839673705-6617adf9e890?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1009,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Cherry\",\r\n            \"productDescription\": \"Cherry\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 90,\r\n            \"total\": 90,\r\n            \"price\": 90,\r\n            \"category\": 1,\r\n            \"rating\": 5,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 1,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"20%\",\r\n            \"orderBy\": 8,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1613490900233-141c5560d75d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1010,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Water Apple\",\r\n            \"productDescription\": \"Water Apple\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 10,\r\n            \"total\": 10,\r\n            \"price\": 20,\r\n            \"category\": 1,\r\n            \"rating\": 1,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 9,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1624953587687-daf255b6b80a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1011,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Pappaya\",\r\n            \"productDescription\": \"Pappaya\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 110,\r\n            \"total\": 110,\r\n            \"price\": 210,\r\n            \"category\": 1,\r\n            \"rating\": 3,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 10,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1623479322729-28b25c16b011?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1012,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Sapotta\",\r\n            \"productDescription\": \"Sapotta\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 120,\r\n            \"total\": 120,\r\n            \"price\": 220,\r\n            \"category\": 1,\r\n            \"rating\": 4,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 11,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1013,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Pomagrante\",\r\n            \"productDescription\": \"Pomagrante\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 130,\r\n            \"total\": 130,\r\n            \"price\": 230,\r\n            \"category\": 1,\r\n            \"rating\": 1,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 12,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1014,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Apple\",\r\n            \"productDescription\": \"Ooty Apple\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 140,\r\n            \"total\": 140,\r\n            \"price\": 140,\r\n            \"category\": 1,\r\n            \"rating\": 5,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 2,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 13,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"productId\": 1015,\r\n            \"tenantId\": 10,\r\n            \"productName\": \"Apple\",\r\n            \"productDescription\": \"Ooty Apple\",\r\n            \"productCode\": \"app001\",\r\n            \"fullDescription\": \"\",\r\n            \"specification\": \"\",\r\n            \"story\": \"\",\r\n            \"packQuantity\": 10,\r\n            \"quantity\": 100,\r\n            \"total\": 100,\r\n            \"price\": 200,\r\n            \"category\": 1,\r\n            \"rating\": 1,\r\n            \"active\": true,\r\n            \"trending\": 1,\r\n            \"userBuyCount\": 50,\r\n            \"return\": 1,\r\n            \"created\": \"date\",\r\n            \"modified\": \"date\",\r\n            \"in_stock\": true,\r\n            \"best_seller\": false,\r\n            \"deleveryDate\": 5,\r\n            \"offer\": \"50%\",\r\n            \"orderBy\": 14,\r\n            \"userId\": 1,\r\n            \"overview\": \"Lorem ipsum dolor sit amet consectetur adipisicing elit. Error unde quisquam magni vel eligendi nam.\",\r\n            \"long_description\": \"Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta aut, vel ipsum maxime quam quia, quaerat tempore minus odio exercitationem illum et eos, quas ipsa aperiam magnam officiis libero expedita quo voluptas deleniti sit dolore? Praesentium tempora cumque facere consectetur quia, molestiae quam, accusamus eius corrupti laudantium aliquid! Tempore laudantium unde labore voluptates repellat, dignissimos aperiam ad ipsum laborum recusandae voluptatem non dolore. Reiciendis cum quo illum. Dolorem, molestiae corporis.\",\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1587440871875-191322ee64b0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"main\" : true,\r\n                    \"active\":true,\r\n                    \"orderBy\": 1\r\n                }\r\n            ]\r\n        }\r\n    ]", typeof(List<Model.Response.ProductMaster.ProductMaster>));
-
-        //    return menu.OrderBy(x => x.OrderBy).ToList();
-        //}
-
-        //public Model.Response.ProductMaster.ProductMaster GetProductDetails(string productId)
-        //{
-        //    List<Model.Response.ProductMaster.ProductMaster> productMaster = GetProductMaster();
-
-        //    return productMaster.Where(x => x.ProductId == Convert.ToInt64(productId)).FirstOrDefault();
-        //}
-
-        //public List<Model.Response.CartList> GetCartProduct()
-        //{
-        //    List<Model.Response.CartList> cartLists = (List<Model.Response.CartList>)Newtonsoft.Json.JsonConvert.DeserializeObject("[\r\n        {\r\n            \"productId\": 1001,\r\n            \"productName\": \"Apple\",\r\n            \"tenantId\": 10,\r\n            \"quantity\": 9,\r\n            \"orderBy\": 15,\r\n            \"userId\": 1,\r\n            \"price\": 200,\r\n            \"images\": [\r\n                {\r\n                    \"imageId\": 1,\r\n                    \"poster\": \"https://images.unsplash.com/photo-1580894894513-541e068a3e2b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=650&q=40\",\r\n                    \"orderBy\": 1,\r\n                    \"main\": true,\r\n                    \"active\": true\r\n                }\r\n            ]\r\n        }\r\n    ]", typeof(List<Model.Response.CartList>));
-
-        //    return cartLists.OrderBy(x => x.OrderBy).ToList();
-        //}        
-
 
         public static string EnDecrypt(string input, bool decrypt = false)
         {
@@ -958,7 +790,1140 @@ namespace Tenant.Query.Service.Product
                 // Log the exception if necessary
                 throw new Exception("An error occurred while removing the product from the wishlist.", ex);
             }
+        }  
+
+        public string GetValueByKey(string key)
+        {
+            try
+            {
+                return productRepository.GetConfigValueByKey(key);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if necessary
+                throw new Exception("An error occurred while retrieving the value by key.", ex);
+            }  
         }
+
+        /// <summary>
+        /// Delete a product
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="productId">Product ID</param>
+        /// <returns>Task</returns>
+        public async Task DeleteProduct(long tenantId, long productId)
+        {
+            try
+            {
+                if (tenantId <= 0)
+                    throw new ArgumentException("Invalid tenant ID", nameof(tenantId));
+
+                if (productId <= 0)
+                    throw new ArgumentException("Invalid product ID", nameof(productId));
+
+                // Get current user ID from context or pass it as parameter
+                long userId = 1; // TODO: Get from context
+
+                // Call repository to delete product
+                await productRepository.DeleteProduct(tenantId, productId, userId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while deleting the product.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get all categories
+        /// </summary>
+        /// <param name="tenantId">Optional tenant ID filter</param>
+        /// <returns>List of categories</returns>
+        public List<CategoryListItem> GetAllCategories(long? tenantId = null)
+        {
+            try
+            {
+                return productRepository.GetAllCategories(tenantId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving categories.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Add a new category
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Category details</param>
+        /// <returns>Newly created category</returns>
+        public async Task<AddCategoryResponse> AddCategory(long tenantId, AddCategoryRequest request)
+        {
+            try
+            {
+                if (tenantId <= 0)
+                    throw new ArgumentException("Invalid tenant ID", nameof(tenantId));
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (string.IsNullOrWhiteSpace(request.CategoryName))
+                    throw new ArgumentException("Category name is required");
+
+                // Get current user ID from context or pass it as parameter
+                long userId = 1; // TODO: Get from context
+
+                // Call repository to add category
+                var categoryId = await productRepository.AddCategory(tenantId, request, userId);
+
+                // Return the newly created category
+                return new AddCategoryResponse
+                {
+                    CategoryId = categoryId,
+                    Category = request.CategoryName,
+                    Active = request.Active,
+                    ParentId = request.ParentCategoryId,
+                    Description = request.Description,
+                    OrderBy = request.OrderBy,
+                    Icon = request.Icon,
+                    SubMenu = request.HasSubMenu,
+                    Link = request.Link,
+                    Created = DateTime.UtcNow,
+                    TenantId = tenantId
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while adding the category.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Update an existing category
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Category details</param>
+        /// <returns>Task</returns>
+        public async Task UpdateCategory(long tenantId, UpdateCategoryRequest request)
+        {
+            try
+            {
+                if (tenantId <= 0)
+                    throw new ArgumentException("Invalid tenant ID", nameof(tenantId));
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.CategoryId <= 0)
+                    throw new ArgumentException("Invalid category ID", nameof(request.CategoryId));
+
+                if (string.IsNullOrWhiteSpace(request.CategoryName))
+                    throw new ArgumentException("Category name is required");
+
+                // Get current user ID from context or pass it as parameter
+                long userId = 1; // TODO: Get from context
+
+                // Call repository to update category
+                await productRepository.UpdateCategory(tenantId, request, userId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while updating the category.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get menu master with categories
+        /// </summary>
+        /// <param name="tenantId">Optional tenant ID filter</param>
+        /// <returns>Menu master with associated categories</returns>
+        public MenuMasterResponse GetMenuMaster(long? tenantId = null)
+        {
+            try
+            {
+                return productRepository.GetMenuMaster(tenantId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving menu master.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Update an existing product
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Product details</param>
+        /// <returns>Product ID</returns>
+        public async Task<long> UpdateProduct(long tenantId, UpdateProductRequest request)
+        {
+            try
+            {
+                if (tenantId <= 0)
+                    throw new ArgumentException("Invalid tenant ID", nameof(tenantId));
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.ProductId <= 0)
+                    throw new ArgumentException("Invalid product ID", nameof(request.ProductId));
+
+                // Validate required fields
+                if (string.IsNullOrWhiteSpace(request.ProductName))
+                    throw new ArgumentException("Product name is required");
+
+                if (string.IsNullOrWhiteSpace(request.ProductCode))
+                    throw new ArgumentException("Product code is required");
+
+                if (request.Price <= 0)
+                    throw new ArgumentException("Price must be greater than zero");
+
+                if (request.Category <= 0)
+                    throw new ArgumentException("Category is required");
+
+                // Call repository to update product
+                return await productRepository.UpdateProduct(tenantId, request);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while updating the product.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Add a new product
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="request">Product details</param>
+        /// <returns>Product ID</returns>
+        public async Task<long> AddProduct(long tenantId, AddProductRequest request)
+        {
+            try
+            {
+                if (tenantId <= 0)
+                    throw new ArgumentException("Invalid tenant ID", nameof(tenantId));
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                // Validate required fields
+                if (string.IsNullOrWhiteSpace(request.ProductName))
+                    throw new ArgumentException("Product name is required");
+
+                if (string.IsNullOrWhiteSpace(request.ProductCode))
+                    throw new ArgumentException("Product code is required");
+
+                if (request.Price <= 0)
+                    throw new ArgumentException("Price must be greater than zero");
+
+                if (request.Category <= 0)
+                    throw new ArgumentException("Category is required");
+
+                // Call repository to add product
+                return await productRepository.AddProduct(tenantId, request);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while adding the product.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get product details by ID
+        /// </summary>
+        /// <param name="productId">Product ID</param>
+        /// <returns>Product details with images</returns>
+        public async Task<ProductDetailItem> GetProductById(long productId)
+        {
+            try
+            {
+                if (productId <= 0)
+                    throw new ArgumentException("Invalid product ID", nameof(productId));
+
+                var result = await productRepository.GetProductById(productId);
+
+                if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+                    return null;
+
+                // Map product details
+                var product = MapProductSearchResults(result.Tables[0]).FirstOrDefault();
+
+                if (product != null && result.Tables.Count > 1)
+                {
+                    // Map images
+                    product.Images = MapProductImages(result.Tables[1]);
+                }
+
+                return product;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving the product.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Maps DataTable to list of product images
+        /// </summary>
+        private List<ProductSearchImageInfo> MapProductImages(DataTable dataTable)
+        {
+            var images = new List<ProductSearchImageInfo>();
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                images.Add(new ProductSearchImageInfo
+                {
+                    ImageId = GetColumnValue<long>(row, "ImageId"),
+                    Poster = GetColumnValue<string>(row, "Poster", string.Empty),
+                    Main = GetColumnValue<bool>(row, "Main"),
+                    Active = GetColumnValue<bool>(row, "Active"),
+                    OrderBy = GetColumnValue<int>(row, "OrderBy")
+                });
+            }
+
+            return images;
+        }
+
+        /// <summary>
+        /// Search products with advanced filtering and pagination
+        /// </summary>
+        /// <param name="tenantId">Tenant ID</param>
+        /// <param name="payload">Search parameters</param>
+        /// <returns>Product search results with pagination</returns>
+        public ProductSearchResponse SearchProducts(string tenantId, ProductSearchPayload payload)
+        {
+            try
+            {
+                if (payload == null)
+                    throw new ArgumentNullException(nameof(payload), "Search payload cannot be null.");
+
+                // Calculate offset for pagination
+                int offset = (payload.Page - 1) * payload.Limit;
+
+                // Call repository method to get search results
+                var searchResults = productRepository.SearchProducts(tenantId, payload, offset);
+
+                // Map the results to response model
+                var response = new ProductSearchResponse();
+
+                if (searchResults != null && searchResults.Tables.Count >= 2)
+                {
+                    // First table contains product data
+                    var productTable = searchResults.Tables[0];
+                    // Second table contains total count
+                    var countTable = searchResults.Tables[1];
+
+                    // Map products
+                    response.Products = MapProductSearchResults(productTable);
+
+                    // Map pagination info
+                    int totalCount = countTable.Rows.Count > 0 ? Convert.ToInt32(countTable.Rows[0]["TotalCount"]) : 0;
+                    response.Pagination = new PaginationInfo
+                    {
+                        Page = payload.Page,
+                        Limit = payload.Limit,
+                        Total = totalCount,
+                        TotalPages = (int)Math.Ceiling((double)totalCount / payload.Limit),
+                        HasNext = payload.Page * payload.Limit < totalCount,
+                        HasPrevious = payload.Page > 1
+                    };
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while searching products.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Maps DataTable results to ProductDetailItem list
+        /// </summary>
+        /// <param name="dataTable">DataTable containing product data</param>
+        /// <returns>List of ProductDetailItem</returns>
+        private List<ProductDetailItem> MapProductSearchResults(DataTable dataTable)
+        {
+            var products = new List<ProductDetailItem>();
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                var product = new ProductDetailItem
+                {
+                    ProductId = GetColumnValue<long>(row, "ProductId"),
+                    TenantId = GetColumnValue<long>(row, "TenantId"),
+                    ProductName = GetColumnValue<string>(row, "ProductName", string.Empty),
+                    ProductDescription = GetColumnValue<string>(row, "ProductDescription", string.Empty),
+                    ProductCode = GetColumnValue<string>(row, "ProductCode", string.Empty),
+                    FullDescription = GetColumnValue<string>(row, "FullDescription", string.Empty),
+                    Specification = GetColumnValue<string>(row, "Specification", string.Empty),
+                    Story = GetColumnValue<string>(row, "Story", string.Empty),
+                    PackQuantity = GetColumnValue<int>(row, "PackQuantity"),
+                    Quantity = GetColumnValue<int>(row, "Quantity"),
+                    Total = GetColumnValue<int>(row, "Total"),
+                    Price = GetColumnValue<decimal>(row, "Price"),
+                    Category = GetColumnValue<int>(row, "Category"),
+                    Rating = GetColumnValue<int>(row, "Rating"),
+                    Active = GetColumnValue<bool>(row, "Active"),
+                    Trending = GetColumnValue<int>(row, "Trending"),
+                    UserBuyCount = GetColumnValue<int>(row, "UserBuyCount"),
+                    Return = GetColumnValue<int>(row, "Return"),
+                    Created = GetColumnValue<DateTime>(row, "Created"),
+                    Modified = GetColumnValue<DateTime>(row, "Modified"),
+                    InStock = GetColumnValue<bool>(row, "InStock"),
+                    BestSeller = GetColumnValue<bool>(row, "BestSeller"),
+                    DeliveryDate = GetColumnValue<int>(row, "DeliveryDate"),
+                    Offer = GetColumnValue<string>(row, "Offer", string.Empty),
+                    OrderBy = GetColumnValue<int>(row, "OrderBy"),
+                    UserId = GetColumnValue<long>(row, "UserId"),
+                    Overview = GetColumnValue<string>(row, "Overview", string.Empty),
+                    LongDescription = GetColumnValue<string>(row, "LongDescription", string.Empty),
+                    Images = new List<ProductSearchImageInfo>() // Images will be populated separately if needed
+                };
+
+                products.Add(product);
+            }
+
+            return products;
+        }
+
+        /// <summary>x
+        /// Get user's shopping cart with full product details
+        /// </summary>
+        /// <param name="request">Cart request with user details</param>
+        /// <returns>Complete cart information with products</returns>
+        public async Task<Model.User.CartResponse> GetUserCart(Model.ProductCart.GetCartRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Get cart attempt for user: {request.UserId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                var cartData = await this.productRepository.GetUserCart(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Cart retrieval successful for user: {request.UserId} - {cartData.Items.Count} items found");
+
+                return cartData;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Cart retrieval failed - user not found: {request?.UserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Cart retrieval error for user {request?.UserId}: {ex.Message}");
+                throw new Exception("An error occurred while retrieving the cart.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Add item to cart
+        /// </summary>
+        /// <param name="request">Add to cart request</param>
+        /// <returns>Cart item details and summary</returns>
+        public async Task<Model.ProductCart.AddToCartResponse> AddItemToCart(Model.ProductCart.AddToCartRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Add to cart attempt for user: {request.UserId}, product: {request.ProductId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                if (request.ProductId <= 0)
+                    throw new ArgumentException("Valid Product ID is required");
+
+                if (request.Quantity <= 0)
+                    throw new ArgumentException("Quantity must be greater than 0");
+
+                var cartResponse = await this.productRepository.AddItemToCart(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Add to cart successful for user: {request.UserId}, product: {request.ProductId}");
+
+                return cartResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Add to cart failed - product/user not found: {request?.ProductId}/{request?.UserId}");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Add to cart failed - business rule violation for user: {request?.UserId}, product: {request?.ProductId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Add to cart error for user {request?.UserId}, product {request?.ProductId}: {ex.Message}");
+                throw new Exception("An error occurred while adding item to cart.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Remove item from cart
+        /// </summary>
+        /// <param name="request">Remove from cart request</param>
+        /// <returns>Removal confirmation and updated cart summary</returns>
+        public async Task<Model.ProductCart.RemoveFromCartResponse> RemoveItemFromCart(Model.ProductCart.RemoveFromCartRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Remove from cart attempt for user: {request.UserId}, product: {request.ProductId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                if (request.ProductId <= 0)
+                    throw new ArgumentException("Valid Product ID is required");
+
+                var removeResponse = await this.productRepository.RemoveItemFromCart(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Remove from cart successful for user: {request.UserId}, product: {request.ProductId}");
+
+                return removeResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Remove from cart failed - product not found in cart: {request?.ProductId} for user: {request?.UserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Remove from cart error for user {request?.UserId}, product {request?.ProductId}: {ex.Message}");
+                throw new Exception("An error occurred while removing item from cart.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Clear entire cart
+        /// </summary>
+        /// <param name="request">Clear cart request</param>
+        /// <returns>Cart clearing confirmation and statistics</returns>
+        public async Task<Model.ProductCart.ClearCartResponse> ClearCart(Model.ProductCart.ClearCartRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Clear cart attempt for user: {request.UserId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                var clearResponse = await this.productRepository.ClearCart(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Clear cart successful for user: {request.UserId} - {clearResponse.ClearedItemCount} items cleared");
+
+                return clearResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Clear cart failed - user not found or cart already empty: {request?.UserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Clear cart error for user {request?.UserId}: {ex.Message}");
+                throw new Exception("An error occurred while clearing the cart.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Create a new order
+        /// </summary>
+        /// <param name="request">Create order request</param>
+        /// <returns>Order creation confirmation and details</returns>
+        public async Task<Model.Order.CreateOrderResponse> CreateOrder(Model.Order.CreateOrderRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Create order attempt for user: {request.UserId} with {request.Items.Count} items");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                if (request.Items == null || !request.Items.Any())
+                    throw new ArgumentException("Order must contain at least one item");
+
+                if (request.ShippingAddress == null)
+                    throw new ArgumentException("Shipping address is required");
+
+                if (request.BillingAddress == null)
+                    throw new ArgumentException("Billing address is required");
+
+                if (request.PaymentMethod == null)
+                    throw new ArgumentException("Payment method is required");
+
+                if (request.ShippingMethod == null)
+                    throw new ArgumentException("Shipping method is required");
+
+                if (request.Totals == null)
+                    throw new ArgumentException("Order totals are required");
+
+                // Validate each item has valid values
+                foreach (var item in request.Items)
+                {
+                    if (item.ProductId <= 0)
+                        throw new ArgumentException($"Invalid product ID: {item.ProductId}");
+
+                    if (item.Quantity <= 0)
+                        throw new ArgumentException($"Invalid quantity for product {item.ProductId}: {item.Quantity}");
+
+                    if (item.Price <= 0)
+                        throw new ArgumentException($"Invalid price for product {item.ProductId}: {item.Price}");
+
+                    if (Math.Abs(item.Total - (item.Price * item.Quantity)) > 0.01m)
+                        throw new ArgumentException($"Price calculation mismatch for product {item.ProductId}");
+                }
+
+                var orderResponse = await this.productRepository.CreateOrder(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Create order successful for user: {request.UserId}, Order Number: {orderResponse.OrderNumber}");
+
+                return orderResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Create order failed - user not found: {request?.UserId}");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Create order failed - business rule violation for user: {request?.UserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Create order error for user {request?.UserId}: {ex.Message}");
+                throw new Exception("An error occurred while creating the order.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get user orders with pagination and filtering
+        /// </summary>
+        /// <param name="request">Get orders request</param>
+        /// <returns>List of orders with pagination information</returns>
+        public async Task<Model.Order.GetOrdersResponse> GetOrders(Model.Order.GetOrdersRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Get orders attempt for user: {request.UserId}, page: {request.Page}, limit: {request.Limit}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                if (request.Page < 1)
+                    request.Page = 1;
+
+                if (request.Limit < 1 || request.Limit > 100)
+                    request.Limit = 10;
+
+                var ordersResponse = await this.productRepository.GetOrders(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Get orders successful for user: {request.UserId}, found {ordersResponse.Orders.Count} orders");
+
+                return ordersResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Get orders failed - user not found: {request?.UserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Get orders error for user {request?.UserId}: {ex.Message}");
+                throw new Exception("An error occurred while retrieving orders.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get order details by order ID
+        /// </summary>
+        /// <param name="request">Get order by ID request</param>
+        /// <returns>Detailed order information</returns>
+        public async Task<Model.Order.GetOrderByIdResponse> GetOrderById(Model.Order.GetOrderByIdRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Get order by ID attempt for user: {request.UserId}, order: {request.OrderId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                if (request.OrderId <= 0)
+                    throw new ArgumentException("Valid Order ID is required");
+
+                var orderResponse = await this.productRepository.GetOrderById(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Get order by ID successful for user: {request.UserId}, order: {request.OrderId}");
+
+                return orderResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Get order by ID failed - order not found or doesn't belong to user: {request?.OrderId} for user: {request?.UserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Get order by ID error for user {request?.UserId}, order {request?.OrderId}: {ex.Message}");
+                throw new Exception("An error occurred while retrieving the order.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Cancel an order
+        /// </summary>
+        /// <param name="request">Cancel order request</param>
+        /// <returns>Order cancellation confirmation</returns>
+        public async Task<Model.Order.CancelOrderResponse> CancelOrder(Model.Order.CancelOrderRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Cancel order attempt for user: {request.UserId}, order: {request.OrderId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                if (request.OrderId <= 0)
+                    throw new ArgumentException("Valid Order ID is required");
+
+                var cancelResponse = await this.productRepository.CancelOrder(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Cancel order successful for user: {request.UserId}, order: {request.OrderId}");
+
+                return cancelResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Cancel order failed - order not found or doesn't belong to user: {request?.OrderId} for user: {request?.UserId}");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Cancel order failed - order cannot be cancelled: {request?.OrderId} for user: {request?.UserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Cancel order error for user {request?.UserId}, order {request?.OrderId}: {ex.Message}");
+                throw new Exception("An error occurred while cancelling the order.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Update order status
+        /// </summary>
+        /// <param name="request">Update order status request</param>
+        /// <returns>Order status update confirmation</returns>
+        public async Task<Model.Order.UpdateOrderStatusResponse> UpdateOrderStatus(Model.Order.UpdateOrderStatusRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Update order status attempt for order: {request.OrderId} to status: {request.Status}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.OrderId <= 0)
+                    throw new ArgumentException("Valid Order ID is required");
+
+                if (string.IsNullOrEmpty(request.Status))
+                    throw new ArgumentException("Status is required");
+
+                // Validate status value (optional - could also be done in stored procedure)
+                var validStatuses = new[] { "Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled", "Returned", "Refunded" };
+                if (!validStatuses.Contains(request.Status, StringComparer.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException($"Invalid status: {request.Status}. Valid statuses are: {string.Join(", ", validStatuses)}");
+                }
+
+                var statusResponse = await this.productRepository.UpdateOrderStatus(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Update order status successful for order: {request.OrderId} to status: {request.Status}");
+
+                return statusResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Update order status failed - order not found: {request?.OrderId}");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Update order status failed - invalid status transition: {request?.OrderId} to {request?.Status}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Update order status error for order {request?.OrderId}: {ex.Message}");
+                throw new Exception("An error occurred while updating the order status.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get all users (Admin only)
+        /// </summary>
+        /// <param name="request">Get all users request</param>
+        /// <returns>Users list with pagination</returns>
+        public async Task<Model.Admin.GetAllUsersResponse> GetAllUsers(Model.Admin.GetAllUsersRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Admin get all users attempt by admin: {request.AdminUserId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.AdminUserId <= 0)
+                    throw new ArgumentException("Valid Admin User ID is required");
+
+                if (request.Page < 1)
+                    request.Page = 1;
+
+                if (request.Limit < 1 || request.Limit > 100)
+                    request.Limit = 10;
+
+                var usersResponse = await this.productRepository.GetAllUsers(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Admin get all users successful by admin: {request.AdminUserId}, found {usersResponse.Users.Count} users");
+
+                return usersResponse;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Admin get all users failed - insufficient privileges: {request?.AdminUserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Admin get all users error for admin {request?.AdminUserId}: {ex.Message}");
+                throw new Exception("An error occurred while retrieving users.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Update user role (Admin only)
+        /// </summary>
+        /// <param name="request">Update user role request</param>
+        /// <returns>Role update confirmation</returns>
+        public async Task<Model.Admin.UpdateUserRoleResponse> UpdateUserRole(Model.Admin.UpdateUserRoleRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Admin update user role attempt by admin: {request.AdminUserId} for user: {request.UserId} to role: {request.Role}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.AdminUserId <= 0)
+                    throw new ArgumentException("Valid Admin User ID is required");
+
+                if (request.UserId <= 0)
+                    throw new ArgumentException("Valid User ID is required");
+
+                if (string.IsNullOrEmpty(request.Role))
+                    throw new ArgumentException("Role is required");
+
+                // Validate role value (optional - could also be done in stored procedure)
+                var validRoles = new[] { "Customer", "Executive", "Admin", "SuperAdmin", "Manager", "Support" };
+                if (!validRoles.Contains(request.Role, StringComparer.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException($"Invalid role: {request.Role}. Valid roles are: {string.Join(", ", validRoles)}");
+                }
+
+                // Validate permissions if provided
+                if (request.Permissions != null && request.Permissions.Any())
+                {
+                    var validPermissions = new[] { 
+                        "view_products", "manage_products", "view_orders", "manage_orders", 
+                        "view_users", "manage_users", "view_reports", "manage_settings",
+                        "view_inventory", "manage_inventory", "view_analytics", "manage_roles"
+                    };
+                    
+                    var invalidPermissions = request.Permissions.Where(p => !validPermissions.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
+                    if (invalidPermissions.Any())
+                    {
+                        throw new ArgumentException($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
+                    }
+                }
+
+                var roleResponse = await this.productRepository.UpdateUserRole(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Admin update user role successful by admin: {request.AdminUserId} for user: {request.UserId} to role: {request.Role}");
+
+                return roleResponse;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Admin update user role failed - insufficient privileges: {request?.AdminUserId}");
+                throw;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Admin update user role failed - user not found: {request?.UserId} by admin: {request?.AdminUserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Admin update user role error by admin {request?.AdminUserId} for user {request?.UserId}: {ex.Message}");
+                throw new Exception("An error occurred while updating user role.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get all orders (Admin only)
+        /// </summary>
+        /// <param name="request">Get all orders request</param>
+        /// <returns>Orders list with pagination and statistics</returns>
+        public async Task<Model.Admin.GetAllOrdersResponse> GetAllOrders(Model.Admin.GetAllOrdersRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Admin get all orders attempt by admin: {request.AdminUserId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.AdminUserId <= 0)
+                    throw new ArgumentException("Valid Admin User ID is required");
+
+                if (request.Page < 1)
+                    request.Page = 1;
+
+                if (request.Limit < 1 || request.Limit > 100)
+                    request.Limit = 10;
+
+                // Validate date range
+                if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate > request.EndDate)
+                    throw new ArgumentException("Start date cannot be later than end date");
+
+                // Validate status if provided
+                if (!string.IsNullOrEmpty(request.Status))
+                {
+                    var validStatuses = new[] { "Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled", "Returned", "Refunded" };
+                    if (!validStatuses.Contains(request.Status, StringComparer.OrdinalIgnoreCase))
+                    {
+                        throw new ArgumentException($"Invalid status: {request.Status}. Valid statuses are: {string.Join(", ", validStatuses)}");
+                    }
+                }
+
+                var ordersResponse = await this.productRepository.GetAllOrders(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Admin get all orders successful by admin: {request.AdminUserId}, found {ordersResponse.Orders.Count} orders");
+
+                return ordersResponse;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Admin get all orders failed - insufficient privileges: {request?.AdminUserId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Admin get all orders error for admin {request?.AdminUserId}: {ex.Message}");
+                throw new Exception("An error occurred while retrieving orders.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Add multiple images to a product
+        /// </summary>
+        /// <param name="request">Add product images request</param>
+        /// <returns>List of added images</returns>
+        public async Task<Model.Product.AddProductImagesResponse> AddProductImages(Model.Product.AddProductImagesRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Add product images attempt for product: {request.ProductId}, count: {request.Images?.Count ?? 0}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.ProductId <= 0)
+                    throw new ArgumentException("Valid Product ID is required");
+
+                if (request.Images == null || !request.Images.Any())
+                    throw new ArgumentException("At least one image file is required");
+
+                // Validate and process each image
+                var imageDataList = new List<Model.Product.ImageUploadData>();
+                int orderCounter = request.OrderBy;
+
+                foreach (var file in request.Images)
+                {
+                    // Validate file
+                    if (file == null || file.Length == 0)
+                        throw new ArgumentException($"Invalid file uploaded");
+
+                    // Validate file size
+                    if (file.Length > 10 * 1024 * 1024) // 10MB
+                        throw new ArgumentException($"File {file.FileName} exceeds size limit");
+
+                    // Validate file type
+                    var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" };
+                    if (!allowedTypes.Contains(file.ContentType.ToLower()))
+                        throw new ArgumentException($"File {file.FileName} has invalid type. Allowed: JPEG, PNG, GIF, WebP");
+
+                    // Read file data
+                    byte[] imageData;
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await file.CopyToAsync(memoryStream);
+                        imageData = memoryStream.ToArray();
+                    }
+
+                    // Create thumbnail if image is large enough
+                    byte[] thumbnailData = null;
+                    try
+                    {
+                        thumbnailData = await CreateThumbnailAsync(imageData, 200, 200);
+                    }
+                    catch (Exception ex)
+                    {
+                        this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Failed to create thumbnail for {file.FileName}: {ex.Message}");
+                    }
+
+                    // Add to upload list
+                    imageDataList.Add(new Model.Product.ImageUploadData
+                    {
+                        ImageName = file.FileName,
+                        ContentType = file.ContentType,
+                        FileSize = file.Length,
+                        ImageData = Convert.ToBase64String(imageData),
+                        ThumbnailData = thumbnailData != null ? Convert.ToBase64String(thumbnailData) : null,
+                        IsMain = request.Main && imageDataList.Count == 0, // Only first image can be main if requested
+                        OrderBy = orderCounter++
+                    });
+                }
+
+                var imagesResponse = await this.productRepository.AddProductImages(request, imageDataList);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Add product images successful for product: {request.ProductId}, added: {imagesResponse.TotalAdded}");
+
+                return imagesResponse;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Add product images error for product {request?.ProductId}: {ex.Message}");
+                throw new Exception("An error occurred while adding product images.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Update product image properties
+        /// </summary>
+        /// <param name="request">Update product image request</param>
+        /// <returns>Updated image information</returns>
+        public async Task<Model.Product.UpdateProductImageResponse> UpdateProductImage(Model.Product.UpdateProductImageRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Update product image attempt for product: {request.ProductId}, image: {request.ImageId}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.ProductId <= 0)
+                    throw new ArgumentException("Valid Product ID is required");
+
+                if (request.ImageId <= 0)
+                    throw new ArgumentException("Valid Image ID is required");
+
+                // Validate that at least one property is being updated
+                if (!request.Main.HasValue && !request.Active.HasValue && !request.OrderBy.HasValue)
+                    throw new ArgumentException("At least one property (main, active, or orderBy) must be specified for update");
+
+                // Validate OrderBy if provided
+                if (request.OrderBy.HasValue && request.OrderBy.Value < 0)
+                    throw new ArgumentException("OrderBy must be a non-negative number");
+
+                var imageResponse = await this.productRepository.UpdateProductImage(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Update product image successful for product: {request.ProductId}, image: {request.ImageId}");
+
+                return imageResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Update product image failed - image not found: {request?.ImageId} for product: {request?.ProductId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Update product image error for product {request?.ProductId}, image {request?.ImageId}: {ex.Message}");
+                throw new Exception("An error occurred while updating the product image.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Delete product image
+        /// </summary>
+        /// <param name="request">Delete product image request</param>
+        /// <returns>Deletion confirmation and remaining images</returns>
+        public async Task<Model.Product.DeleteProductImageResponse> DeleteProductImage(Model.Product.DeleteProductImageRequest request)
+        {
+            try
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Delete product image attempt for product: {request.ProductId}, image: {request.ImageId}, hard: {request.HardDelete}");
+
+                if (request == null)
+                    throw new ArgumentNullException(nameof(request));
+
+                if (request.ProductId <= 0)
+                    throw new ArgumentException("Valid Product ID is required");
+
+                if (request.ImageId <= 0)
+                    throw new ArgumentException("Valid Image ID is required");
+
+                var deleteResponse = await this.productRepository.DeleteProductImage(request);
+
+                this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Delete product image successful for product: {request.ProductId}, image: {request.ImageId}");
+
+                return deleteResponse;
+            }
+            catch (KeyNotFoundException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Delete product image failed - image not found: {request?.ImageId} for product: {request?.ProductId}");
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogWarning($"Delete product image failed - cannot delete last main image: {request?.ImageId} for product: {request?.ProductId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this._loggerFactory.CreateLogger<ProductService>().LogError($"Delete product image error for product {request?.ProductId}, image {request?.ImageId}: {ex.Message}");
+                throw new Exception("An error occurred while deleting the product image.", ex);
+            }
+        }
+
         #endregion
     }
 }
