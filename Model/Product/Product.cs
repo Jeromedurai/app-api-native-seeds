@@ -6,11 +6,14 @@ namespace Tenant.Query.Model.Product
 {
     public class Product
     {
-        [JsonProperty("name")]
+        [JsonProperty("productName")]
         public string ProductName { get; set; }
 
-        [JsonProperty("displayname")]
+        [JsonProperty("productDescription")]
         public string Displayname { get; set; }
+
+        [JsonProperty("productCode")]
+        public string productCode { get; set; }
 
         [JsonProperty("rating"),]
         public long Rating { get; set; }
@@ -62,6 +65,9 @@ namespace Tenant.Query.Model.Product
 
         [JsonProperty("userId")]
         public long UserId { get; set; }
+
+        [JsonProperty("category")]
+        public long Category { get; set; }
 
         [JsonProperty("vendorId")]
         public long? VendorId { get; set; }

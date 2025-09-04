@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Tenant.API.Base.Controller;
+
 using Tenant.API.Base.Model.Security;
 using Tenant.Query.Service.Authentication;
 
@@ -24,7 +26,8 @@ namespace Tenant.Query.Controllers.Authentication
         /// Generate the tenant token.
         /// </summary>
         /// <returns>The token.</returns>
-        /// <param name="validationContext">Validation context.</param>
+        /// <param name="validatio
+        /// nContext">Validation context.</param>
         [AllowAnonymous]
         [HttpPost]      
         [Route("tenant-token")]

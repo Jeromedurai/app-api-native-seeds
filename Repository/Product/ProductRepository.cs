@@ -877,16 +877,9 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>();
-                
-                if (tenantId.HasValue)
-                {
-                    parameters.Add("TenantId", tenantId.Value);
-                }
-
                 var result = _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_GET_MENU_MASTER,
-                    parameters
+                    tenantId ?? (object)DBNull.Value
                 );
 
                 var response = new MenuMasterResponse();

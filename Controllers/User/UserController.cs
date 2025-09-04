@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Tenant.API.Base.Attribute;
 using Tenant.API.Base.Controller;
 using Tenant.API.Base.Model;
+using Tenant.Query.Model.User;
 using Tenant.Query.Service;
 
 namespace Tenant.Query.Controllers
@@ -79,6 +81,7 @@ namespace Tenant.Query.Controllers
         /// <param name="request">Login credentials</param>
         /// <returns>User information and authentication token</returns>
         [HttpPost]
+        [AllowAnonymous]
         [Route("auth/login")]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
@@ -128,6 +131,7 @@ namespace Tenant.Query.Controllers
         /// <returns>User information and authentication token</returns>
         [HttpPost]
         [Route("auth/register")]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone already exists", typeof(ApiResult))]
@@ -175,6 +179,7 @@ namespace Tenant.Query.Controllers
         /// <returns>Logout confirmation</returns>
         [HttpPost]
         [Route("auth/logout")]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
@@ -233,6 +238,7 @@ namespace Tenant.Query.Controllers
         /// <returns>User profile data</returns>
         [HttpGet]
         [Route("auth/profile")]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(Model.User.UserProfileResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
@@ -247,15 +253,13 @@ namespace Tenant.Query.Controllers
                 }
 
                 var profileResponse = await this.Service.GetUserProfile(userId, tenantId);
-                return StatusCode(StatusCodes.Status200OK, profileResponse);
+                return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = profileResponse });
             }
             catch (KeyNotFoundException ex)
             {
                 var errorResponse = new Model.User.UserProfileResponse
                 {
-                    Success = false,
                     Data = null,
-                    Message = ex.Message
                 };
                 return NotFound(errorResponse);
             }
@@ -263,9 +267,7 @@ namespace Tenant.Query.Controllers
             {
                 var errorResponse = new Model.User.UserProfileResponse
                 {
-                    Success = false,
                     Data = null,
-                    Message = ex.Message
                 };
                 return BadRequest(errorResponse);
             }
@@ -273,9 +275,7 @@ namespace Tenant.Query.Controllers
             {
                 var errorResponse = new Model.User.UserProfileResponse
                 {
-                    Success = false,
                     Data = null,
-                    Message = "An error occurred while retrieving the profile"
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
             }
@@ -288,6 +288,7 @@ namespace Tenant.Query.Controllers
         /// <returns>Success confirmation</returns>
         [HttpPost]
         [Route("auth/update-profile")]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
@@ -340,6 +341,7 @@ namespace Tenant.Query.Controllers
         /// <returns>Success confirmation</returns>
         [HttpPost]
         [Route("auth/reset-password")]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Invalid or expired token", typeof(ApiResult))]

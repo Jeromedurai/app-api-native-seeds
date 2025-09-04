@@ -225,9 +225,7 @@ namespace Tenant.Query.Service.User
 
                 var response = new Model.User.UserProfileResponse
                 {
-                    Success = true,
                     Data = profileData,
-                    Message = "Profile retrieved successfully"
                 };
 
                 this.Logger.LogInformation($"Profile retrieval successful for user: {userId}");

@@ -59,17 +59,35 @@ namespace Tenant.Query.Repository.User
             {
                 this.Logger.LogInformation($"Repository: Login attempt for {request.EmailOrPhone}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "EmailOrPhone", request.EmailOrPhone },
-                    { "Password", request.Password },
-                    { "RememberMe", request.RememberMe }
-                };
+                // Log the parameters being passed to help with debugging
+                this.Logger.LogInformation($"Repository: Calling SP_USER_LOGIN with parameters: EmailOrPhone={request.EmailOrPhone}, Password={request.Password?.Substring(0, Math.Min(3, request.Password?.Length ?? 0))}..., RememberMe={request.RememberMe}");
 
-                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
-                    Model.Constant.Constant.StoredProcedures.SP_USER_LOGIN,
-                    parameters
-                ));
+                // Validate parameters before calling stored procedure
+                if (string.IsNullOrEmpty(request.EmailOrPhone))
+                {
+                    throw new ArgumentException("Email or phone number cannot be null or empty");
+                }
+                if (string.IsNullOrEmpty(request.Password))
+                {
+                    throw new ArgumentException("Password cannot be null or empty");
+                }
+
+                DataSet result;
+                try
+                {
+                    result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                        Model.Constant.Constant.StoredProcedures.SP_USER_LOGIN,
+                        request.EmailOrPhone,
+                        request.Password,
+                        request.RememberMe
+                    ));
+                }
+                catch (Exception ex)
+                {
+                    this.Logger.LogError($"Repository: DataAccess.ExecuteDataset error: {ex.Message}");
+                    this.Logger.LogError($"Repository: DataAccess.ExecuteDataset error type: {ex.GetType().Name}");
+                    throw;
+                }
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
                 {
@@ -124,6 +142,7 @@ namespace Tenant.Query.Repository.User
             catch (Exception ex)
             {
                 this.Logger.LogError($"Repository: Login error for {request.EmailOrPhone}: {ex.Message}");
+                this.Logger.LogError($"Repository: Login error details - Exception type: {ex.GetType().Name}, Stack trace: {ex.StackTrace}");
                 
                 // Check for specific error messages from stored procedure
                 if (ex.Message.Contains("Account is temporarily locked") || 
@@ -134,6 +153,11 @@ namespace Tenant.Query.Repository.User
                 else if (ex.Message.Contains("Invalid email/phone or password"))
                 {
                     throw new UnauthorizedAccessException(ex.Message);
+                }
+                else if (ex.Message.Contains("number of parameters does not match"))
+                {
+                    this.Logger.LogError($"Repository: Parameter mismatch error - this suggests a stored procedure definition issue");
+                    throw new InvalidOperationException($"Stored procedure parameter mismatch: {ex.Message}");
                 }
                 
                 throw;
@@ -151,19 +175,14 @@ namespace Tenant.Query.Repository.User
             {
                 this.Logger.LogInformation($"Repository: Registration attempt for {request.Email}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "Name", request.Name },
-                    { "Email", request.Email },
-                    { "Phone", request.Phone },
-                    { "Password", request.Password },
-                    { "TenantId", request.TenantId },
-                    { "AgreeToTerms", request.AgreeToTerms }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_USER_REGISTER,
-                    parameters
+                    request.Name,
+                    request.Email,
+                    request.Phone,
+                    request.Password,
+                    request.TenantId,
+                    request.AgreeToTerms
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -278,18 +297,13 @@ namespace Tenant.Query.Repository.User
             {
                 this.Logger.LogInformation($"Repository: Logout attempt for user {request.UserId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "Token", request.Token ?? (object)DBNull.Value },
-                    { "RefreshToken", request.RefreshToken ?? (object)DBNull.Value },
-                    { "DeviceId", request.DeviceId ?? (object)DBNull.Value },
-                    { "LogoutFromAllDevices", request.LogoutFromAllDevices }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_USER_LOGOUT,
-                    parameters
+                    request.UserId,
+                    request.Token ?? (object)DBNull.Value,
+                    request.RefreshToken ?? (object)DBNull.Value,
+                    request.DeviceId ?? (object)DBNull.Value,
+                    request.LogoutFromAllDevices
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -337,20 +351,14 @@ namespace Tenant.Query.Repository.User
         {
             try
             {
-                var activityParameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "ActivityType", activityType },
-                    { "ActivityDescription", description },
-                    { "IPAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value },
-                    { "DeviceId", request.DeviceId ?? (object)DBNull.Value },
-                    { "CreatedAt", DateTime.UtcNow }
-                };
-
                 // Note: This assumes you have a stored procedure for logging activities
                 // If not, you can implement direct SQL insert or create the stored procedure
-                // _dataAccess.ExecuteNonQuery("SP_LOG_USER_ACTIVITY", activityParameters);
+                // _dataAccess.ExecuteNonQuery("SP_LOG_USER_ACTIVITY", 
+                //     request.UserId, activityType, description, 
+                //     request.IpAddress ?? (object)DBNull.Value,
+                //     request.UserAgent ?? (object)DBNull.Value,
+                //     request.DeviceId ?? (object)DBNull.Value,
+                //     DateTime.UtcNow);
                 
                 this.Logger.LogInformation($"User activity logged: {activityType} for user {request.UserId}");
             }
@@ -373,15 +381,10 @@ namespace Tenant.Query.Repository.User
             {
                 this.Logger.LogInformation($"Repository: Get profile for user {userId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", userId },
-                    { "TenantId", tenantId ?? (object)DBNull.Value }
-                };
-
-                var result = await Task.Run(() => _dataAccess.ExecuteDataset(
+                var result = await Task.Run(() =>   _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_GET_USER_PROFILE,
-                    parameters
+                    userId,
+                    tenantId ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -539,51 +542,32 @@ namespace Tenant.Query.Repository.User
             {
                 this.Logger.LogInformation($"Repository: Profile update for user {request.UserId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "Name", request.Name ?? (object)DBNull.Value },
-                    { "Phone", request.Phone ?? (object)DBNull.Value },
-                    { "DateOfBirth", request.DateOfBirth ?? (object)DBNull.Value },
-                    { "Gender", request.Gender ?? (object)DBNull.Value },
-                    { "Bio", request.Bio ?? (object)DBNull.Value },
-                    { "Website", request.Website ?? (object)DBNull.Value },
-                    { "CompanyName", request.CompanyName ?? (object)DBNull.Value },
-                    { "JobTitle", request.JobTitle ?? (object)DBNull.Value },
-                    { "Country", request.Country ?? (object)DBNull.Value },
-                    { "City", request.City ?? (object)DBNull.Value },
-                    { "State", request.State ?? (object)DBNull.Value },
-                    { "PostalCode", request.PostalCode ?? (object)DBNull.Value },
-                    { "Timezone", request.Timezone ?? (object)DBNull.Value },
-                    { "Language", request.Language ?? (object)DBNull.Value },
-                    { "PreferredContactMethod", request.PreferredContactMethod ?? (object)DBNull.Value }
-                };
-
-                // Add address parameters if address information is provided
-                if (request.Address != null)
-                {
-                    parameters.Add("AddressStreet", request.Address.Street ?? (object)DBNull.Value);
-                    parameters.Add("AddressCity", request.Address.City ?? (object)DBNull.Value);
-                    parameters.Add("AddressState", request.Address.State ?? (object)DBNull.Value);
-                    parameters.Add("AddressZipCode", request.Address.ZipCode ?? (object)DBNull.Value);
-                    parameters.Add("AddressCountry", request.Address.Country ?? (object)DBNull.Value);
-                    parameters.Add("AddressType", request.Address.AddressType ?? "Home");
-                    parameters.Add("UpdateAddressIfExists", request.Address.UpdateIfExists);
-                }
-                else
-                {
-                    parameters.Add("AddressStreet", DBNull.Value);
-                    parameters.Add("AddressCity", DBNull.Value);
-                    parameters.Add("AddressState", DBNull.Value);
-                    parameters.Add("AddressZipCode", DBNull.Value);
-                    parameters.Add("AddressCountry", DBNull.Value);
-                    parameters.Add("AddressType", "Home");
-                    parameters.Add("UpdateAddressIfExists", true);
-                }
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_UPDATE_USER_PROFILE,
-                    parameters
+                    request.UserId,
+                    request.Name ?? (object)DBNull.Value,
+                    request.Phone ?? (object)DBNull.Value,
+                    request.DateOfBirth ?? (object)DBNull.Value,
+                    request.Gender ?? (object)DBNull.Value,
+                    request.Bio ?? (object)DBNull.Value,
+                    request.Website ?? (object)DBNull.Value,
+                    request.CompanyName ?? (object)DBNull.Value,
+                    request.JobTitle ?? (object)DBNull.Value,
+                    request.Country ?? (object)DBNull.Value,
+                    request.City ?? (object)DBNull.Value,
+                    request.State ?? (object)DBNull.Value,
+                    request.PostalCode ?? (object)DBNull.Value,
+                    request.Timezone ?? (object)DBNull.Value,
+                    request.Language ?? (object)DBNull.Value,
+                    request.PreferredContactMethod ?? (object)DBNull.Value,
+                    // Address parameters
+                    request.Address?.Street ?? (object)DBNull.Value,
+                    request.Address?.City ?? (object)DBNull.Value,
+                    request.Address?.State ?? (object)DBNull.Value,
+                    request.Address?.ZipCode ?? (object)DBNull.Value,
+                    request.Address?.Country ?? (object)DBNull.Value,
+                    request.Address?.AddressType ?? "Home",
+                    request.Address?.UpdateIfExists ?? true
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -620,7 +604,7 @@ namespace Tenant.Query.Repository.User
         /// <summary>
         /// Reset user password using reset token
         /// </summary>
-        /// <param name="request">Password reset request</param>
+        /// <param name="request">Password reset request</param>    
         /// <returns>Password reset response</returns>
         public async Task<Model.User.ResetPasswordResponse> ResetPassword(Model.User.ResetPasswordRequest request)
         {
@@ -628,17 +612,12 @@ namespace Tenant.Query.Repository.User
             {
                 this.Logger.LogInformation($"Repository: Password reset attempt for token: {request.ResetToken?.Substring(0, Math.Min(10, request.ResetToken?.Length ?? 0))}...");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "ResetToken", request.ResetToken },
-                    { "NewPassword", request.NewPassword },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_RESET_PASSWORD,
-                    parameters
+                    request.ResetToken,
+                    request.NewPassword,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)

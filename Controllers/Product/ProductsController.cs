@@ -264,11 +264,13 @@ namespace Tenant.Query.Controllers.Product
 
         #region Crude endpoint
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpPost]
         [Route("tenants/{tenantId:long}/add-product")]
-        public async Task<IActionResult> AddProduct([FromRoute] long tenantId, [FromBody] Model.Product.Product product)
+        public async Task<IActionResult> AddProduct([FromRoute] long tenantId, 
+            [FromBody] Model.Product.Product product)
         {
             try
             {
@@ -505,6 +507,7 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="request">Product details</param>
         /// <returns>Product ID</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpPost]

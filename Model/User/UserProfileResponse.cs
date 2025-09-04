@@ -9,19 +9,9 @@ namespace Tenant.Query.Model.User
     public class UserProfileResponse
     {
         /// <summary>
-        /// Operation success status
-        /// </summary>
-        public bool Success { get; set; } = true;
-
-        /// <summary>
         /// User profile data
         /// </summary>
         public UserProfileData Data { get; set; }
-
-        /// <summary>
-        /// Response message
-        /// </summary>
-        public string Message { get; set; } = "Profile retrieved successfully";
     }
 
     /// <summary>
@@ -34,7 +24,7 @@ namespace Tenant.Query.Model.User
         /// </summary>
         public long UserId { get; set; }
 
-        /// <summary>
+        /// <summary>   
         /// User's first name
         /// </summary>
         public string FirstName { get; set; }

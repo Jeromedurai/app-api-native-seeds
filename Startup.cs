@@ -8,6 +8,7 @@ using Tenant.API.Base.Startup;
 using Tenant.API.Base.Util;
 using Sa.Common.ADO.DataAccess;
 using Microsoft.OpenApi.Models;
+using System.Data.SqlClient;
 
 namespace Tenant.Query
 {
@@ -64,7 +65,7 @@ namespace Tenant.Query
             services.AddDbContextPool<Context.UserContext>(options =>
             {
                 //options.UseSqlServer(Configuration.GetConnectionString("Default_SSL"));
-                options.UseSqlServer(TnUtil.DecryptConnection.SetConnectionString(Configuration["ConnectionStrings:Default_SSL"]),
+                options.UseSqlServer(SetConnectionString(Configuration["ConnectionStrings:Default"]),
                 sqlServerOptions => sqlServerOptions.CommandTimeout(60));
                 options.EnableSensitiveDataLogging(true);
                 options.UseLoggerFactory(TnBaseStartup.LoggerFactory);
@@ -73,7 +74,7 @@ namespace Tenant.Query
             services.AddDbContextPool<Context.AppNotification.AppNotificationContext>(options =>
             {
                 //options.UseSqlServer(Configuration.GetConnectionString("Default_SSL"));
-                options.UseSqlServer(TnUtil.DecryptConnection.SetConnectionString(Configuration["ConnectionStrings:Default_SSL"]),
+                options.UseSqlServer(SetConnectionString(Configuration["ConnectionStrings:Default"]),
                 sqlServerOptions => sqlServerOptions.CommandTimeout(60));
                 options.EnableSensitiveDataLogging(true);
                 options.UseLoggerFactory(TnBaseStartup.LoggerFactory);
@@ -82,7 +83,7 @@ namespace Tenant.Query
             services.AddDbContextPool<Context.Content.ContentContext>(options =>
             {
                 //options.UseSqlServer(Configuration.GetConnectionString("Default_SSL"));
-                options.UseSqlServer(TnUtil.DecryptConnection.SetConnectionString(Configuration["ConnectionStrings:Default_SSL"]),
+                options.UseSqlServer(SetConnectionString(Configuration["ConnectionStrings:Default"]),
                 sqlServerOptions => sqlServerOptions.CommandTimeout(60));
                 options.EnableSensitiveDataLogging(true);
                 options.UseLoggerFactory(TnBaseStartup.LoggerFactory);
@@ -92,7 +93,7 @@ namespace Tenant.Query
             services.AddDbContext<Context.Product.ProductContext>(options =>
             {
                 //options.UseSqlServer(Configuration.GetConnectionString("Default_SSL"));
-                options.UseSqlServer(TnUtil.DecryptConnection.SetConnectionString(Configuration["ConnectionStrings:Default_SSL"]),
+                options.UseSqlServer(SetConnectionString(Configuration["ConnectionStrings:Default"]),
                 sqlServerOptions => sqlServerOptions.CommandTimeout(60));
                 options.EnableSensitiveDataLogging(true);
                 options.UseLoggerFactory(TnBaseStartup.LoggerFactory);
@@ -101,7 +102,7 @@ namespace Tenant.Query
             services.AddDbContext<Context.Authentication.AuthenticationContext>(options =>
             {
                 //options.UseSqlServer(Configuration.GetConnectionString("Default_SSL"));
-                options.UseSqlServer(TnUtil.DecryptConnection.SetConnectionString(Configuration["ConnectionStrings:Default_SSL"]),
+                options.UseSqlServer(SetConnectionString(Configuration["ConnectionStrings:Default"]),
                 sqlServerOptions => sqlServerOptions.CommandTimeout(60));
                 options.EnableSensitiveDataLogging(true);
                 options.UseLoggerFactory(TnBaseStartup.LoggerFactory);
@@ -128,7 +129,7 @@ namespace Tenant.Query
                 c.CustomSchemaIds(i => i.FullName);
             });
 
-            services.AddSingleton<DataAccess>(_ => new DataAccess(TnUtil.DecryptConnection.SetConnectionString(Configuration["ConnectionStrings:Default"])));
+            services.AddSingleton<DataAccess>(_ => new DataAccess(SetConnectionString(Configuration["ConnectionStrings:Default"])));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -146,6 +147,13 @@ namespace Tenant.Query
             });
 
             /*** End: API Specific Configuration ***/
+        }
+
+        public static string SetConnectionString(string connectionString)
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            builder.Password = Service.Product.ProductService.EnDecrypt(builder.Password, true);
+            return builder.ToString();
         }
     }
 }
