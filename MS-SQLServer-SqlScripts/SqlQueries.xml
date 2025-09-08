@@ -214,9 +214,7 @@
 				Modified DATETIME2(7) DEFAULT GETUTCDATE() NOT NULL,
 				CreatedBy BIGINT NULL,
 				ModifiedBy BIGINT NULL,
-				CONSTRAINT PK_MenuMaster PRIMARY KEY CLUSTERED (MenuId),
-				CONSTRAINT FK_MenuMaster_CreatedBy FOREIGN KEY (CreatedBy) REFERENCES Users(UserId),
-				CONSTRAINT FK_MenuMaster_ModifiedBy FOREIGN KEY (ModifiedBy) REFERENCES Users(UserId)
+				CONSTRAINT PK_MenuMaster PRIMARY KEY CLUSTERED (MenuId)
 			);
 
 			-- Categories Table
@@ -236,12 +234,7 @@
 				Modified DATETIME2(7) DEFAULT GETUTCDATE() NOT NULL,
 				CreatedBy BIGINT NULL,
 				ModifiedBy BIGINT NULL,
-				CONSTRAINT PK_Categories PRIMARY KEY CLUSTERED (CategoryId),
-				CONSTRAINT FK_Categories_ParentCategory FOREIGN KEY (ParentCategoryId) REFERENCES Categories(CategoryId),
-				CONSTRAINT FK_Categories_Menu FOREIGN KEY (MenuId) REFERENCES MenuMaster(MenuId),
-				CONSTRAINT FK_Categories_CreatedBy FOREIGN KEY (CreatedBy) REFERENCES Users(UserId),
-				CONSTRAINT FK_Categories_ModifiedBy FOREIGN KEY (ModifiedBy) REFERENCES Users(UserId),
-				CONSTRAINT UQ_Categories_TenantName UNIQUE (TenantId, CategoryName)
+				CONSTRAINT PK_Categories PRIMARY KEY CLUSTERED (CategoryId)
 			);
 
 			-- Product Categories Table (Alternative structure for flexibility)
@@ -311,17 +304,7 @@
 				ModifiedBy BIGINT NULL,
 				DeletedAt DATETIME2(7) NULL,
 				DeletedBy BIGINT NULL,
-				CONSTRAINT PK_Products PRIMARY KEY CLUSTERED (ProductId),
-				CONSTRAINT FK_Products_Category FOREIGN KEY (Category) REFERENCES Categories(CategoryId),
-				CONSTRAINT FK_Products_CreatedBy FOREIGN KEY (CreatedBy) REFERENCES Users(UserId),
-				CONSTRAINT FK_Products_ModifiedBy FOREIGN KEY (ModifiedBy) REFERENCES Users(UserId),
-				CONSTRAINT FK_Products_DeletedBy FOREIGN KEY (DeletedBy) REFERENCES Users(UserId),
-				CONSTRAINT UQ_Products_TenantCode UNIQUE (TenantId, ProductCode),
-				CONSTRAINT UQ_Products_SKU UNIQUE (SKU),
-				CONSTRAINT CK_Products_Price CHECK (Price >= 0),
-				CONSTRAINT CK_Products_Quantity CHECK (Quantity >= 0),
-				CONSTRAINT CK_Products_Rating CHECK (Rating >= 0 AND Rating <= 5),
-				CONSTRAINT CK_Products_DiscountPercentage CHECK (DiscountPercentage >= 0 AND DiscountPercentage <= 100)
+				CONSTRAINT PK_Products PRIMARY KEY CLUSTERED (ProductId)
 			);
 
 			-- Product Images Table
