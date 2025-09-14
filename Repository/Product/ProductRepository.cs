@@ -140,48 +140,48 @@ namespace Tenant.Query.Repository.Product
             }
         }
 
-        /// <summary>
-        /// Add Product
-        /// </summary>
-        /// <param name="tenantId"></param>
-        /// <param name="product"></param>
-        /// <returns></returns>
-        public async Task<long> AddProduct(long tenantId, Model.Product.Product product)
-        {
-            try
-            {
-                var productId = await Task.Run(() =>
-                    _dataAccess.ExecuteDataTable(Model.Constant.Constant.StoredProcedures.SA_REALTIMEOCR_ADD_INVOICE,
-                    tenantId, 
-                    product.ProductName,
-                    product.Displayname,
-                    product.Rating,
-                    product.Total,
-                    product.Price,
-                    product.Tax,
-                    product.Stock,
-                    product.Description,
-                    product.Quantity,
-                    product.MinimunQuantity,
-                    product.Numofreviews,
-                    product.Active,
-                    1,
-                    1,
-                    product.BestSeller,
-                    product.VendorId));
+        ///// <summary>
+        ///// Add Product
+        ///// </summary>
+        ///// <param name="tenantId"></param>
+        ///// <param name="product"></param>
+        ///// <returns></returns>
+        //public async Task<long> AddProduct(long tenantId, Model.Product.Product product)
+        //{
+        //    try
+        //    {
+        //        var productId = await Task.Run(() =>
+        //            _dataAccess.ExecuteDataTable(Model.Constant.Constant.StoredProcedures.SA_REALTIMEOCR_ADD_INVOICE,
+        //            tenantId, 
+        //            product.ProductName,
+        //            product.Displayname,
+        //            product.Rating,
+        //            product.Total,
+        //            product.Price,
+        //            product.Tax,
+        //            product.Stock,
+        //            product.Description,
+        //            product.Quantity,
+        //            product.MinimunQuantity,
+        //            product.Numofreviews,
+        //            product.Active,
+        //            1,
+        //            1,
+        //            product.BestSeller,
+        //            product.VendorId));
 
-                if (productId.Rows.Count > 0)
-                {
-                    return Convert.ToInt64(productId.Rows[0]["PRODUCT_ID"]);
-                }
+        //        if (productId.Rows.Count > 0)
+        //        {
+        //            return Convert.ToInt64(productId.Rows[0]["PRODUCT_ID"]);
+        //        }
 
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+        //        return 0;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         /// <summary>
         /// 
@@ -708,16 +708,11 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    { "ProductId", productId },
-                    { "TenantId", tenantId },
-                    { "UserId", userId }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_DELETE_PRODUCT,
-                    parameters
+                    productId,
+                    tenantId,
+                    userId
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -740,16 +735,9 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>();
-                
-                if (tenantId.HasValue)
-                {
-                    parameters.Add("TenantId", tenantId.Value);
-                }
-
                 var result = _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_GET_ALL_CATEGORIES,
-                    parameters
+                    tenantId ?? (object)DBNull.Value
                 );
 
                 var categories = new List<CategoryListItem>();
@@ -794,23 +782,18 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    { "TenantId", tenantId },
-                    { "CategoryName", request.CategoryName },
-                    { "Description", request.Description ?? (object)DBNull.Value },
-                    { "Active", request.Active },
-                    { "ParentCategoryId", request.ParentCategoryId ?? (object)DBNull.Value },
-                    { "OrderBy", request.OrderBy },
-                    { "Icon", request.Icon ?? (object)DBNull.Value },
-                    { "HasSubMenu", request.HasSubMenu },
-                    { "Link", request.Link ?? (object)DBNull.Value },
-                    { "UserId", userId }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_ADD_CATEGORY,
-                    parameters
+                    tenantId,
+                    request.CategoryName,
+                    request.Description ?? (object)DBNull.Value,
+                    request.Active,
+                    request.ParentCategoryId ?? (object)DBNull.Value,
+                    request.OrderBy,
+                    request.Icon ?? (object)DBNull.Value,
+                    request.HasSubMenu,
+                    request.Link ?? (object)DBNull.Value,
+                    userId
                 ));
 
                 if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
@@ -837,24 +820,19 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    { "CategoryId", request.CategoryId },
-                    { "TenantId", tenantId },
-                    { "CategoryName", request.CategoryName },
-                    { "Description", request.Description ?? (object)DBNull.Value },
-                    { "Active", request.Active },
-                    { "ParentCategoryId", request.ParentCategoryId ?? (object)DBNull.Value },
-                    { "OrderBy", request.OrderBy },
-                    { "Icon", request.Icon ?? (object)DBNull.Value },
-                    { "HasSubMenu", request.HasSubMenu },
-                    { "Link", request.Link ?? (object)DBNull.Value },
-                    { "UserId", userId }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_UPDATE_CATEGORY,
-                    parameters
+                    request.CategoryId,
+                    tenantId,
+                    request.CategoryName,
+                    request.Description ?? (object)DBNull.Value,
+                    request.Active,
+                    request.ParentCategoryId ?? (object)DBNull.Value,
+                    request.OrderBy,
+                    request.Icon ?? (object)DBNull.Value,
+                    request.HasSubMenu,
+                    request.Link ?? (object)DBNull.Value,
+                    userId
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -965,37 +943,32 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    { "ProductId", request.ProductId },
-                    { "TenantId", tenantId },
-                    { "ProductName", request.ProductName },
-                    { "ProductDescription", request.ProductDescription },
-                    { "ProductCode", request.ProductCode },
-                    { "FullDescription", request.FullDescription },
-                    { "Specification", request.Specification },
-                    { "Story", request.Story },
-                    { "PackQuantity", request.PackQuantity },
-                    { "Quantity", request.Quantity },
-                    { "Total", request.Total },
-                    { "Price", request.Price },
-                    { "Category", request.Category },
-                    { "Rating", request.Rating },
-                    { "Active", request.Active },
-                    { "Trending", request.Trending },
-                    { "UserBuyCount", request.UserBuyCount },
-                    { "Return", request.Return },
-                    { "BestSeller", request.BestSeller },
-                    { "DeliveryDate", request.DeliveryDate },
-                    { "Offer", request.Offer },
-                    { "OrderBy", request.OrderBy },
-                    { "UserId", request.UserId },
-                    { "ModifiedBy", request.UserId }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_UPDATE_PRODUCT,
-                    parameters
+                    request.ProductId,
+                    tenantId,
+                    request.ProductName,
+                    request.ProductDescription,
+                    request.ProductCode,
+                    request.FullDescription,
+                    request.Specification,
+                    request.Story,
+                    request.PackQuantity,
+                    request.Quantity,
+                    request.Total,
+                    request.Price,
+                    request.Category,
+                    request.Rating,
+                    request.Active,
+                    request.Trending,
+                    request.UserBuyCount,
+                    request.Return,
+                    request.BestSeller,
+                    request.DeliveryDate,
+                    request.Offer,
+                    request.OrderBy,
+                    request.UserId,
+                    request.UserId // ModifiedBy
                 ));
 
                 if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
@@ -1021,36 +994,31 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    { "TenantId", tenantId },
-                    { "ProductName", request.ProductName },
-                    { "ProductDescription", request.ProductDescription },
-                    { "ProductCode", request.ProductCode },
-                    { "FullDescription", request.FullDescription },
-                    { "Specification", request.Specification },
-                    { "Story", request.Story },
-                    { "PackQuantity", request.PackQuantity },
-                    { "Quantity", request.Quantity },
-                    { "Total", request.Total },
-                    { "Price", request.Price },
-                    { "Category", request.Category },
-                    { "Rating", request.Rating },
-                    { "Active", request.Active },
-                    { "Trending", request.Trending },
-                    { "UserBuyCount", request.UserBuyCount },
-                    { "Return", request.Return },
-                    { "BestSeller", request.BestSeller },
-                    { "DeliveryDate", request.DeliveryDate },
-                    { "Offer", request.Offer },
-                    { "OrderBy", request.OrderBy },
-                    { "UserId", request.UserId },
-                    { "CreatedBy", request.UserId }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_ADD_PRODUCT,
-                    parameters
+                    tenantId,
+                    request.ProductName,
+                    request.ProductDescription,
+                    request.ProductCode,
+                    request.FullDescription,
+                    request.Specification,
+                    request.Story,
+                    request.PackQuantity,
+                    request.Quantity,
+                    request.Total,
+                    request.Price,
+                    request.Category,
+                    request.Rating,
+                    request.Active,
+                    request.Trending,
+                    request.UserBuyCount,
+                    request.Return,
+                    request.BestSeller,
+                    request.DeliveryDate,
+                    request.Offer,
+                    request.OrderBy,
+                    request.UserId,
+                    request.UserId // CreatedBy
                 ));
 
                 if (result != null && result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
@@ -1062,7 +1030,7 @@ namespace Tenant.Query.Repository.Product
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -1075,14 +1043,9 @@ namespace Tenant.Query.Repository.Product
         {
             try
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    { "ProductId", productId }
-                };
-
                 return await Task.Run(() => _dataAccess.ExecuteDataset(
                     Constant.StoredProcedures.SP_GET_PRODUCT_BY_ID,
-                    parameters
+                    productId
                 ));
             }
             catch (Exception ex)
@@ -1135,7 +1098,9 @@ namespace Tenant.Query.Repository.Product
         //}
 
         /// <summary>
-        /// Search products with advanced filtering and pagination
+        /// Search 
+        /// 
+        /// with advanced filtering and pagination
         /// </summary>
         /// <param name="tenantId">Tenant ID</param>
         /// <param name="payload">Search parameters</param>
@@ -1183,15 +1148,10 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Get cart for user {request.UserId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_GET_USER_CART,
-                    parameters
+                    request.UserId,
+                    request.TenantId ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0)
@@ -1339,7 +1299,7 @@ namespace Tenant.Query.Repository.Product
 
         /// <summary>
         /// Add item to cart
-        /// </summary>
+        /// </summary>  
         /// <param name="request">Add to cart request</param>
         /// <returns>Cart item details and summary</returns>
         public async Task<Model.ProductCart.AddToCartResponse> AddItemToCart(Model.ProductCart.AddToCartRequest request)
@@ -1348,20 +1308,15 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Add to cart for user {request.UserId}, product {request.ProductId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "ProductId", request.ProductId },
-                    { "Quantity", request.Quantity },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "SessionId", request.SessionId ?? (object)DBNull.Value },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_ADD_ITEM_TO_CART,
-                    parameters
+                    request.UserId,
+                    request.ProductId,
+                    request.Quantity,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.SessionId ?? (object)DBNull.Value,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -1439,19 +1394,14 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Remove from cart for user {request.UserId}, product {request.ProductId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "ProductId", request.ProductId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "RemoveCompletely", request.RemoveCompletely },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_REMOVE_ITEM_FROM_CART,
-                    parameters
+                    request.UserId,
+                    request.ProductId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.RemoveCompletely,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -1538,18 +1488,13 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Clear cart for user {request.UserId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "ClearCompletely", request.ClearCompletely },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_CLEAR_CART,
-                    parameters
+                    request.UserId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.ClearCompletely,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -1645,24 +1590,19 @@ namespace Tenant.Query.Repository.Product
                 var shippingMethodJson = System.Text.Json.JsonSerializer.Serialize(request.ShippingMethod);
                 var orderTotalsJson = System.Text.Json.JsonSerializer.Serialize(request.Totals);
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "OrderItems", orderItemsJson },
-                    { "ShippingAddress", shippingAddressJson },
-                    { "BillingAddress", billingAddressJson },
-                    { "PaymentMethod", paymentMethodJson },
-                    { "ShippingMethod", shippingMethodJson },
-                    { "OrderTotals", orderTotalsJson },
-                    { "Notes", request.Notes ?? (object)DBNull.Value },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_CREATE_ORDER,
-                    parameters
+                    request.UserId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    orderItemsJson,
+                    shippingAddressJson,
+                    billingAddressJson,
+                    paymentMethodJson,
+                    shippingMethodJson,
+                    orderTotalsJson,
+                    request.Notes ?? (object)DBNull.Value,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -1760,19 +1700,14 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Get orders for user {request.UserId}, page {request.Page}, limit {request.Limit}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "UserId", request.UserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "Page", request.Page },
-                    { "Limit", request.Limit },
-                    { "Status", request.Status ?? (object)DBNull.Value },
-                    { "Search", request.Search ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_GET_ORDERS,
-                    parameters
+                    request.UserId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.Page,
+                    request.Limit,
+                    request.Status ?? (object)DBNull.Value,
+                    request.Search ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0)
@@ -1895,16 +1830,11 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Get order by ID for user {request.UserId}, order {request.OrderId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "OrderId", request.OrderId },
-                    { "UserId", request.UserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_GET_ORDER_BY_ID,
-                    parameters
+                    request.OrderId,
+                    request.UserId,
+                    request.TenantId ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -2039,20 +1969,15 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Cancel order for user {request.UserId}, order {request.OrderId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "OrderId", request.OrderId },
-                    { "UserId", request.UserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "CancelReason", request.CancelReason ?? (object)DBNull.Value },
-                    { "CancelledBy", request.CancelledBy ?? (object)DBNull.Value },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_CANCEL_ORDER,
-                    parameters
+                    request.OrderId,
+                    request.UserId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.CancelReason ?? (object)DBNull.Value,
+                    request.CancelledBy ?? (object)DBNull.Value,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -2114,24 +2039,19 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Update order status for order {request.OrderId} to {request.Status}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "OrderId", request.OrderId },
-                    { "UserId", request.UserId ?? (object)DBNull.Value },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "NewStatus", request.Status },
-                    { "StatusNote", request.Note ?? (object)DBNull.Value },
-                    { "TrackingNumber", request.TrackingNumber ?? (object)DBNull.Value },
-                    { "Carrier", request.Carrier ?? (object)DBNull.Value },
-                    { "EstimatedDelivery", request.EstimatedDelivery ?? (object)DBNull.Value },
-                    { "UpdatedBy", request.UpdatedBy ?? (object)DBNull.Value },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_UPDATE_ORDER_STATUS,
-                    parameters
+                    request.OrderId,
+                    request.UserId ?? (object)DBNull.Value,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.Status,
+                    request.Note ?? (object)DBNull.Value,
+                    request.TrackingNumber ?? (object)DBNull.Value,
+                    request.Carrier ?? (object)DBNull.Value,
+                    request.EstimatedDelivery ?? (object)DBNull.Value,
+                    request.UpdatedBy ?? (object)DBNull.Value,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -2212,20 +2132,15 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Admin get all users by admin {request.AdminUserId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "AdminUserId", request.AdminUserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "Page", request.Page },
-                    { "Limit", request.Limit },
-                    { "Search", request.Search ?? (object)DBNull.Value },
-                    { "Role", request.Role ?? (object)DBNull.Value },
-                    { "Status", request.Status ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_ADMIN_GET_ALL_USERS,
-                    parameters
+                    request.AdminUserId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.Page,
+                    request.Limit,
+                    request.Search ?? (object)DBNull.Value,
+                    request.Role ?? (object)DBNull.Value,
+                    request.Status ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0)
@@ -2355,20 +2270,15 @@ namespace Tenant.Query.Repository.Product
                     permissionsJson = System.Text.Json.JsonSerializer.Serialize(request.Permissions);
                 }
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "AdminUserId", request.AdminUserId },
-                    { "UserId", request.UserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "RoleName", request.Role },
-                    { "Permissions", permissionsJson ?? (object)DBNull.Value },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_ADMIN_UPDATE_USER_ROLE,
-                    parameters
+                    request.AdminUserId,
+                    request.UserId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.Role,
+                    permissionsJson ?? (object)DBNull.Value,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -2442,21 +2352,16 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Admin get all orders by admin {request.AdminUserId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "AdminUserId", request.AdminUserId },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "Page", request.Page },
-                    { "Limit", request.Limit },
-                    { "Status", request.Status ?? (object)DBNull.Value },
-                    { "Search", request.Search ?? (object)DBNull.Value },
-                    { "StartDate", request.StartDate ?? (object)DBNull.Value },
-                    { "EndDate", request.EndDate ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_ADMIN_GET_ALL_ORDERS,
-                    parameters
+                    request.AdminUserId,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.Page,
+                    request.Limit,
+                    request.Status ?? (object)DBNull.Value,
+                    request.Search ?? (object)DBNull.Value,
+                    request.StartDate ?? (object)DBNull.Value,
+                    request.EndDate ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0)
@@ -2613,19 +2518,14 @@ namespace Tenant.Query.Repository.Product
                 // Convert image data list to JSON for stored procedure
                 string imagesJson = System.Text.Json.JsonSerializer.Serialize(imageDataList);
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "ProductId", request.ProductId },
-                    { "UserId", request.UserId ?? (object)DBNull.Value },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "Images", imagesJson },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_ADD_PRODUCT_IMAGES,
-                    parameters
+                    request.ProductId,
+                    request.UserId ?? (object)DBNull.Value,
+                    request.TenantId ?? (object)DBNull.Value,
+                    imagesJson,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -2698,22 +2598,17 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Update product image for product {request.ProductId}, image {request.ImageId}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "ProductId", request.ProductId },
-                    { "ImageId", request.ImageId },
-                    { "UserId", request.UserId ?? (object)DBNull.Value },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "IsMain", request.Main ?? (object)DBNull.Value },
-                    { "Active", request.Active ?? (object)DBNull.Value },
-                    { "OrderBy", request.OrderBy ?? (object)DBNull.Value },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_UPDATE_PRODUCT_IMAGE,
-                    parameters
+                    request.ProductId,
+                    request.ImageId,
+                    request.UserId ?? (object)DBNull.Value,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.Main ?? (object)DBNull.Value,
+                    request.Active ?? (object)DBNull.Value,
+                    request.OrderBy ?? (object)DBNull.Value,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -2782,20 +2677,15 @@ namespace Tenant.Query.Repository.Product
             {
                 this.Logger.LogInformation($"Repository: Delete product image for product {request.ProductId}, image {request.ImageId}, hard: {request.HardDelete}");
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "ProductId", request.ProductId },
-                    { "ImageId", request.ImageId },
-                    { "UserId", request.UserId ?? (object)DBNull.Value },
-                    { "TenantId", request.TenantId ?? (object)DBNull.Value },
-                    { "HardDelete", request.HardDelete },
-                    { "IpAddress", request.IpAddress ?? (object)DBNull.Value },
-                    { "UserAgent", request.UserAgent ?? (object)DBNull.Value }
-                };
-
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_DELETE_PRODUCT_IMAGE,
-                    parameters
+                    request.ProductId,
+                    request.ImageId,
+                    request.UserId ?? (object)DBNull.Value,
+                    request.TenantId ?? (object)DBNull.Value,
+                    request.HardDelete,
+                    request.IpAddress ?? (object)DBNull.Value,
+                    request.UserAgent ?? (object)DBNull.Value
                 ));
 
                 if (result == null || result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)

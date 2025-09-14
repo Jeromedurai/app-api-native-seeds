@@ -341,7 +341,6 @@ namespace Tenant.Query.Controllers
         /// <returns>Success confirmation</returns>
         [HttpPost]
         [Route("auth/reset-password")]
-        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Invalid or expired token", typeof(ApiResult))]

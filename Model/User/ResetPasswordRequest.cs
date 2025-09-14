@@ -9,11 +9,9 @@ namespace Tenant.Query.Model.User
     public class ResetPasswordRequest
     {
         /// <summary>
-        /// Password reset token (required)
+        /// User ID
         /// </summary>
-        [Required(ErrorMessage = "Reset token is required")]
-        [StringLength(500, ErrorMessage = "Reset token cannot exceed 500 characters")]
-        public string ResetToken { get; set; }
+        public long UserId { get; set; }
 
         /// <summary>
         /// New password (required)

@@ -610,11 +610,11 @@ namespace Tenant.Query.Repository.User
         {
             try
             {
-                this.Logger.LogInformation($"Repository: Password reset attempt for token: {request.ResetToken?.Substring(0, Math.Min(10, request.ResetToken?.Length ?? 0))}...");
+                this.Logger.LogInformation($"Repository: Password reset attempt for token: {request.UserId}...");
 
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_RESET_PASSWORD,
-                    request.ResetToken,
+                    request.UserId,
                     request.NewPassword,
                     request.IpAddress ?? (object)DBNull.Value,
                     request.UserAgent ?? (object)DBNull.Value
@@ -641,7 +641,7 @@ namespace Tenant.Query.Repository.User
             }
             catch (Exception ex)
             {
-                this.Logger.LogError($"Repository: Password reset error for token {request.ResetToken?.Substring(0, Math.Min(10, request.ResetToken?.Length ?? 0))}...: {ex.Message}");
+                this.Logger.LogError($"Repository: Password reset error for token {request.UserId}...: {ex.Message}");
                 
                 // Check for specific error messages from stored procedure
                 if (ex.Message.Contains("Invalid or expired reset token"))

@@ -309,13 +309,8 @@ namespace Tenant.Query.Service.User
         {
             try
             {
-                this.Logger.LogInformation($"Password reset attempt for token: {request.ResetToken?.Substring(0, Math.Min(10, request.ResetToken?.Length ?? 0))}...");
-
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
-
-                if (string.IsNullOrWhiteSpace(request.ResetToken))
-                    throw new ArgumentException("Reset token is required");
 
                 if (string.IsNullOrWhiteSpace(request.NewPassword))
                     throw new ArgumentException("New password is required");
@@ -352,17 +347,17 @@ namespace Tenant.Query.Service.User
             }
             catch (UnauthorizedAccessException)
             {
-                this.Logger.LogWarning($"Invalid or expired reset token used: {request?.ResetToken?.Substring(0, Math.Min(10, request?.ResetToken?.Length ?? 0))}...");
+                this.Logger.LogWarning($"Invalid or expired reset token used: {request?.UserId}");
                 throw;
             }
             catch (InvalidOperationException)
             {
-                this.Logger.LogWarning($"Reset token already used: {request?.ResetToken?.Substring(0, Math.Min(10, request?.ResetToken?.Length ?? 0))}...");
+                this.Logger.LogWarning($"Reset token already used: {request?.UserId}");
                 throw;
             }
             catch (System.Exception ex)
             {
-                this.Logger.LogError($"Password reset error for token {request?.ResetToken?.Substring(0, Math.Min(10, request?.ResetToken?.Length ?? 0))}...: {ex.Message}");
+                this.Logger.LogError($"Password reset error for token {request?.UserId}");
                 throw new System.Exception("An error occurred while resetting the password.", ex);
             }
         }

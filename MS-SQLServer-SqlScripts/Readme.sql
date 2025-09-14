@@ -1,0 +1,40 @@
+-- auth
+    -- token , internsal , stronge it
+-- User 
+    -- login 
+    -- reigister, indian pjone no, 
+    -- reset password
+    -- logout
+    -- get user
+-- Profile
+    -- Get user profile
+    -- update user profile
+-- product
+    -- search product
+    -- get product
+    -- add product 
+    -- update product
+    -- delete product
+-- image
+    -- add image
+    -- get images
+-- category
+    -- get category
+    -- update category
+    -- mernu master
+-- cart
+    -- add to cart
+    -- update cart
+    -- clear cart
+    -- get cart
+-- order
+    -- get orders - admin
+    -- get order by id or user
+    -- order cancel
+    -- order status update
+    -- make order
+-- wish list
+    -- add to wish list
+    -- update wish list
+    -- clear wish list
+    -- get wish list

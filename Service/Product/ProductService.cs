@@ -216,27 +216,6 @@ namespace Tenant.Query.Service.Product
             }
         }
 
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tenantId"></param>
-        /// <param name="product"></param>
-        /// <returns></returns>
-        public async Task<long> AddProduct(long tenantId, Model.Product.Product product)
-        {
-            try
-            {
-                long productId = await this.productRepository.AddProduct(tenantId, product);
-                return productId;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         /// <summary>
         /// 
         /// </summary>

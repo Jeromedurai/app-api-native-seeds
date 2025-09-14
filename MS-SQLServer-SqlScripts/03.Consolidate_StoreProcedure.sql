@@ -1,3 +1,341 @@
+USE [DB_HIMALAYA]
+IF OBJECT_ID(N'[dbo].[SP_USER_LOGOUT]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_USER_LOGOUT];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_ADD_PRODUCT]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_ADD_PRODUCT];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_DELETE_PRODUCT]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_DELETE_PRODUCT];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_MENU_MASTER]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_MENU_MASTER];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_PRODUCT_BY_ID]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_PRODUCT_BY_ID];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_USER_CART]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_USER_CART];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_USER_PROFILE]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_USER_PROFILE];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_RESET_PASSWORD]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_RESET_PASSWORD];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_SEARCH_PRODUCTS]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_SEARCH_PRODUCTS];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_UPDATE_PRODUCT]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_UPDATE_PRODUCT];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_UPDATE_USER_PROFILE]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_UPDATE_USER_PROFILE];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_USER_LOGIN]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_USER_LOGIN];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_USER_LOGOUT]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_USER_LOGOUT];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_USER_REGISTER]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_USER_REGISTER];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_ADD_ITEM_TO_CART]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_ADD_ITEM_TO_CART];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_USER_CART]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_USER_CART];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_REMOVE_ITEM_FROM_CART]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_REMOVE_ITEM_FROM_CART];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_CLEAR_CART]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_CLEAR_CART];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_CREATE_ORDER]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_CREATE_ORDER];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_ORDERS]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_ORDERS];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_ORDER_BY_ID]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_ORDER_BY_ID];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_CREATE_ORDER]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_CREATE_ORDER];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_CANCEL_ORDER]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_CANCEL_ORDER];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_UPDATE_ORDER_STATUS]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_UPDATE_ORDER_STATUS];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_ADMIN_GET_ALL_USERS]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_ADMIN_GET_ALL_USERS];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_ADMIN_UPDATE_USER_ROLE]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_ADMIN_UPDATE_USER_ROLE];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_ADMIN_GET_ALL_ORDERS]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_ADMIN_GET_ALL_ORDERS];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_ADD_PRODUCT_IMAGES]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_ADD_PRODUCT_IMAGES];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_UPDATE_PRODUCT_IMAGE]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_UPDATE_PRODUCT_IMAGE];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_DELETE_PRODUCT_IMAGE]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_DELETE_PRODUCT_IMAGE];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_GET_ALL_CATEGORIES]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_GET_ALL_CATEGORIES];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_ADD_CATEGORY]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_ADD_CATEGORY];
+GO
+
+IF OBJECT_ID(N'[dbo].[SP_UPDATE_CATEGORY]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[SP_UPDATE_CATEGORY];
+GO
+
+
+CREATE PROCEDURE [dbo].[SP_UPDATE_CATEGORY]
+	@CategoryId BIGINT,
+	@TenantId BIGINT,
+	@CategoryName NVARCHAR(255),
+	@Description NVARCHAR(MAX) = NULL,
+	@Active BIT = 1,
+	@ParentCategoryId BIGINT = NULL,
+	@OrderBy INT = 0,
+	@Icon NVARCHAR(255) = NULL,
+	@HasSubMenu BIT = 0,
+	@Link NVARCHAR(500) = NULL,
+	@UserId BIGINT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	BEGIN TRY
+		BEGIN TRANSACTION;
+		
+		-- Check if category exists and belongs to the tenant
+		IF NOT EXISTS (SELECT 1 FROM Categories WHERE CategoryId = @CategoryId AND TenantId = @TenantId)
+		BEGIN
+			RAISERROR('Category not found or does not belong to this tenant.', 16, 1);
+			RETURN;
+		END
+		
+		-- Check if new category name already exists for this tenant (excluding current category)
+		IF EXISTS (SELECT 1 FROM Categories WHERE CategoryName = @CategoryName AND TenantId = @TenantId AND CategoryId != @CategoryId)
+		BEGIN
+			RAISERROR('Category name already exists for this tenant.', 16, 1);
+			RETURN;
+		END
+		
+		-- Validate parent category if provided
+		IF @ParentCategoryId IS NOT NULL
+		BEGIN
+			IF NOT EXISTS (SELECT 1 FROM Categories WHERE CategoryId = @ParentCategoryId AND TenantId = @TenantId)
+			BEGIN
+				RAISERROR('Parent category does not exist.', 16, 1);
+				RETURN;
+			END
+			
+			-- Prevent circular reference (category cannot be its own parent or grandparent)
+			IF @ParentCategoryId = @CategoryId
+			BEGIN
+				RAISERROR('Category cannot be its own parent.', 16, 1);
+				RETURN;
+			END
+		END
+		
+		-- Update category
+		UPDATE Categories
+		SET 
+			CategoryName = @CategoryName,
+			Description = @Description,
+			Active = @Active,
+			ParentCategoryId = @ParentCategoryId,
+			OrderBy = @OrderBy,
+			Icon = @Icon,
+			HasSubMenu = @HasSubMenu,
+			Link = @Link,
+			Modified = GETUTCDATE(),
+			ModifiedBy = @UserId
+		WHERE CategoryId = @CategoryId
+			AND TenantId = @TenantId;
+		
+		-- Return the updated category ID
+		SELECT @CategoryId AS CategoryId;
+		
+		COMMIT TRANSACTION;
+	END TRY
+	BEGIN CATCH
+		IF @@TRANCOUNT > 0
+			ROLLBACK TRANSACTION;
+			
+		DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+		DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+		DECLARE @ErrorState INT = ERROR_STATE();
+		
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+	END CATCH
+END
+GO
+
+CREATE PROCEDURE [dbo].[SP_ADD_CATEGORY]
+	@TenantId BIGINT,
+	@CategoryName NVARCHAR(255),
+	@Description NVARCHAR(MAX) = NULL,
+	@Active BIT = 1,
+	@ParentCategoryId BIGINT = NULL,
+	@OrderBy INT = 0,
+	@Icon NVARCHAR(255) = NULL,
+	@HasSubMenu BIT = 0,
+	@Link NVARCHAR(500) = NULL,
+	@UserId BIGINT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	BEGIN TRY
+		BEGIN TRANSACTION;
+		
+		-- Check if category name already exists for this tenant
+		IF EXISTS (SELECT 1 FROM Categories WHERE CategoryName = @CategoryName AND TenantId = @TenantId)
+		BEGIN
+			RAISERROR('Category name already exists for this tenant.', 16, 1);
+			RETURN;
+		END
+		
+		-- Validate parent category if provided
+		IF @ParentCategoryId IS NOT NULL
+		BEGIN
+			IF NOT EXISTS (SELECT 1 FROM Categories WHERE CategoryId = @ParentCategoryId AND TenantId = @TenantId)
+			BEGIN
+				RAISERROR('Parent category does not exist.', 16, 1);
+				RETURN;
+			END
+		END
+		
+		-- Insert new category
+		INSERT INTO Categories (
+			TenantId,
+			CategoryName,
+			Description,
+			Active,
+			ParentCategoryId,
+			OrderBy,
+			Icon,
+			HasSubMenu,
+			Link,
+			Created,
+			CreatedBy,
+			Modified,
+			ModifiedBy
+		) VALUES (
+			@TenantId,
+			@CategoryName,
+			@Description,
+			@Active,
+			@ParentCategoryId,
+			@OrderBy,
+			@Icon,
+			@HasSubMenu,
+			@Link,
+			GETUTCDATE(),
+			@UserId,
+			GETUTCDATE(),
+			@UserId
+		);
+		
+		-- Return the new category ID
+		SELECT SCOPE_IDENTITY() AS CategoryId;
+		
+		COMMIT TRANSACTION;
+	END TRY
+	BEGIN CATCH
+		IF @@TRANCOUNT > 0
+			ROLLBACK TRANSACTION;
+			
+		DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+		DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+		DECLARE @ErrorState INT = ERROR_STATE();
+		
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+	END CATCH
+END
+GO
+
+CREATE PROCEDURE [dbo].[SP_GET_ALL_CATEGORIES]
+	@TenantId BIGINT = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	BEGIN TRY
+		-- Get all categories with optional tenant filtering
+		SELECT 
+			c.CategoryId,
+			c.CategoryName AS Category,
+			c.Active,
+			c.HasSubMenu AS SubMenu,
+			c.Created,
+			c.Modified,
+			c.OrderBy,
+			c.Description,
+			c.Icon,
+			c.ParentCategoryId,
+			c.TenantId
+		FROM Categories c
+		WHERE (@TenantId IS NULL OR c.TenantId = @TenantId)
+			AND c.Active = 1
+		ORDER BY c.OrderBy, c.CategoryName;
+		
+	END TRY
+	BEGIN CATCH
+		DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+		DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+		DECLARE @ErrorState INT = ERROR_STATE();
+		
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+	END CATCH
+END
+GO
+
 CREATE PROCEDURE [dbo].[SP_USER_LOGOUT]
 	@UserId BIGINT,
 	@Token NVARCHAR(MAX) = NULL,
@@ -46,6 +384,7 @@ BEGIN
 				SET IsRevoked = 1, 
 					RevokedAt = GETUTCDATE(),
 					RevokedReason = 'User logout'
+			
 				WHERE UserId = @UserId 
 					AND (Token = @Token OR RefreshToken = @RefreshToken)
 					AND IsRevoked = 0;
@@ -82,7 +421,7 @@ BEGIN
 			@UserId,
 			'LOGOUT',
 			CASE 
-				WHEN @LogoutFromAllDevices = 1 THEN 'Logout from all devices'
+			WHEN @LogoutFromAllDevices = 1 THEN 'Logout from all devices'
 				WHEN @DeviceId IS NOT NULL THEN 'Logout from device: ' + @DeviceId
 				ELSE 'User logout'
 			END,
@@ -159,7 +498,7 @@ BEGIN
 END
 GO
 
-alter PROCEDURE [dbo].[SP_USER_REGISTER]
+CREATE PROCEDURE [dbo].[SP_USER_REGISTER]
 	@Name NVARCHAR(255),
 	@Email NVARCHAR(255),
 	@Phone NVARCHAR(50),
@@ -200,7 +539,7 @@ BEGIN
 		END
 		
 		-- Generate salt and hash password
-		SET @Salt = CONVERT(NVARCHAR(100), NEWID());
+		SET @Salt = CONVERT(NVARCHAR(50), NEWID());
 		SET @PasswordHash = CONVERT(NVARCHAR(100), HASHBYTES('SHA2_256', cast(@Password as NVARCHAR(100))+ @Salt), 2);
 
 		-- Parse name into first and last name
@@ -298,8 +637,8 @@ END
 GO
 
 CREATE PROCEDURE [dbo].[SP_USER_LOGIN]
-	@EmailOrPhone NVARCHAR(255),
-	@Password NVARCHAR(255),
+	@EmailOrPhone NVARCHAR(100),
+	@Password NVARCHAR(100),
 	@RememberMe BIT = 0
 AS
 BEGIN
@@ -309,7 +648,7 @@ BEGIN
 		DECLARE @UserId BIGINT = NULL;
 		DECLARE @IsActive BIT = 0;
 		DECLARE @PasswordHash NVARCHAR(255);
-		DECLARE @Salt NVARCHAR(255);
+		DECLARE @Salt NVARCHAR(100);
 		DECLARE @LoginAttempts INT = 0;
 		DECLARE @AccountLocked BIT = 0;
 		DECLARE @LastLoginAttempt DATETIME;
@@ -356,7 +695,7 @@ BEGIN
 		
 		-- Verify password (In real implementation, you would hash the input password with salt)
 		-- For demo purposes, we'll do a simple comparison
-		IF @PasswordHash != HASHBYTES('SHA256', @Password + @Salt)
+		IF @PasswordHash != CONVERT(NVARCHAR(100), HASHBYTES('SHA2_256', cast(@Password as NVARCHAR(100))+ @Salt), 2)
 		BEGIN
 			-- Increment login attempts
 			SET @LoginAttempts = @LoginAttempts + 1;
@@ -734,9 +1073,9 @@ BEGIN
 END
 GO
 
-ALTER PROCEDURE [dbo].[SP_RESET_PASSWORD]
-	@ResetToken NVARCHAR(255),
-	@NewPassword NVARCHAR(255),
+CREATE PROCEDURE [dbo].[SP_RESET_PASSWORD]
+	@UserId BIGINT,
+	@NewPassword NVARCHAR(100),
 	@IpAddress NVARCHAR(45) = NULL,
 	@UserAgent NVARCHAR(500) = NULL
 AS
@@ -745,8 +1084,7 @@ BEGIN
 	
 	BEGIN TRY
 		BEGIN TRANSACTION;
-		
-		DECLARE @UserId BIGINT = NULL;
+
 		DECLARE @TokenExpiry DATETIME = NULL;
 		DECLARE @TokenUsed BIT = 0;
 		DECLARE @Email NVARCHAR(255) = NULL;
@@ -756,41 +1094,22 @@ BEGIN
 		
 		-- Validate reset token and get user information
 		SELECT 
-			@UserId = prt.UserId,
-			@TokenExpiry = prt.ExpiresAt,
-			@TokenUsed = prt.IsUsed,
-			@Email = u.Email
-		FROM PasswordResetTokens prt
-		INNER JOIN Users u ON prt.UserId = u.UserId
-		WHERE prt.ResetToken = @ResetToken
-			AND u.Active = 1;
+			@UserId = UserId
+		FROM Users 
+		WHERE Active = 1 AND UserId=@UserId;
 		
 		-- Check if token exists
 		IF @UserId IS NULL
 		BEGIN
-			RAISERROR('Invalid or expired reset token.', 16, 1);
-			RETURN;
-		END
-		
-		-- Check if token has already been used
-		IF @TokenUsed = 1
-		BEGIN
-			RAISERROR('Reset token has already been used.', 16, 1);
-			RETURN;
-		END
-		
-		-- Check if token has expired
-		IF @TokenExpiry < @CurrentTime
-		BEGIN
-			RAISERROR('Reset token has expired. Please request a new password reset.', 16, 1);
+			RAISERROR('Invalid or expired reset USER.', 16, 1);
 			RETURN;
 		END
 		
 		-- Generate a new salt and hash the password
-		SET @Salt = CAST(RIGHT(NEWID(), 12) AS NVARCHAR(100));
-		SET @HashedPassword = CONVERT(NVARCHAR(255), HASHBYTES('SHA_256', CAST(@NewPassword AS NVARCHAR(100)) + @Salt), 2);
+		SET @Salt = CONVERT(NVARCHAR(50), NEWID());						  
+		SET @HashedPassword = CONVERT(NVARCHAR(100), HASHBYTES('SHA2_256', cast(@NewPassword as NVARCHAR(100))+ @Salt), 2);
 		
-		-- Update user password
+		-- Update user password	
 		UPDATE Users
 		SET 
 			PasswordHash = @HashedPassword,
@@ -801,23 +1120,7 @@ BEGIN
 			-- Reset failed login attempts since password was successfully reset
 			LoginAttempts = 0,
 			AccountLocked = 0
-		WHERE UserId = @UserId;
-		
-		-- Mark the reset token as used
-		UPDATE PasswordResetTokens
-		SET 
-			IsUsed = 1,
-			UsedAt = @CurrentTime,
-			UpdatedAt = @CurrentTime
-		WHERE ResetToken = @ResetToken;
-		
-		-- Invalidate all existing sessions/tokens for this user (for security)
-		UPDATE UserSessions
-		SET 
-			IsActive = 0,
-			LoggedOutAt = @CurrentTime,
-			UpdatedAt = @CurrentTime
-		WHERE UserId = @UserId AND IsActive = 1;
+		WHERE UserId = @UserId;		
 		
 		-- Log the password reset activity
 		INSERT INTO UserActivityLog (
@@ -897,7 +1200,7 @@ BEGIN
 END
 GO
 
-ALTER PROCEDURE [dbo].[SP_SEARCH_PRODUCTS]
+CREATE PROCEDURE [dbo].[SP_SEARCH_PRODUCTS]
 	@TenantId BIGINT,
 	@Page INT = 1,
 	@Limit INT = 10,
@@ -1112,7 +1415,7 @@ BEGIN
 	END
 	GO
 
-		alter PROCEDURE [dbo].[SP_ADD_PRODUCT]
+CREATE PROCEDURE [dbo].[SP_ADD_PRODUCT]
 			@TenantId BIGINT,
 			@ProductName NVARCHAR(255),
 			@ProductDescription NVARCHAR(500),
@@ -1394,3 +1697,225 @@ BEGIN
 			END CATCH
 		END
 		GO
+
+
+				CREATE PROCEDURE [dbo].[SP_ADD_ITEM_TO_CART]
+			@UserId BIGINT,
+			@ProductId BIGINT,
+			@Quantity INT,
+			@TenantId BIGINT = NULL,
+			@SessionId NVARCHAR(255) = NULL,
+			@IpAddress NVARCHAR(45) = NULL,
+			@UserAgent NVARCHAR(500) = NULL
+		AS
+		BEGIN
+			SET NOCOUNT ON;
+			
+			BEGIN TRY
+				BEGIN TRANSACTION;
+				
+				DECLARE @ExistingCartId BIGINT = NULL;
+				DECLARE @ExistingQuantity INT = 0;
+				DECLARE @ProductPrice DECIMAL(18,2) = 0;
+				DECLARE @ProductName NVARCHAR(255) = '';
+				DECLARE @AvailableStock INT = 0;
+				DECLARE @ProductActive BIT = 0;
+				DECLARE @CurrentTime DATETIME = GETUTCDATE();
+				DECLARE @NewQuantity INT = 0;
+				
+				-- Validate user exists and is active
+				IF NOT EXISTS (SELECT 1 FROM Users WHERE UserId = @UserId AND Active = 1)
+				BEGIN
+					RAISERROR('User not found or inactive.', 16, 1);
+					RETURN;
+				END
+				
+				-- Validate product exists, is active, and get product details
+				SELECT 
+					@ProductPrice = Price,
+					@ProductName = ProductName,
+					@AvailableStock = Quantity,
+					@ProductActive = Active
+				FROM Products 
+				WHERE ProductId = @ProductId
+					AND (@TenantId IS NULL OR TenantId = @TenantId);
+				
+				IF @ProductActive IS NULL OR @ProductActive = 0
+				BEGIN
+					RAISERROR('Product not found or inactive.', 16, 1);
+					RETURN;
+				END
+				
+				-- Validate quantity is positive
+				IF @Quantity <= 0
+				BEGIN
+					RAISERROR('Quantity must be greater than 0.', 16, 1);
+					RETURN;
+				END
+				
+				-- Check if item already exists in cart
+				SELECT 
+					@ExistingCartId = CartId,
+					@ExistingQuantity = Quantity
+				FROM CartItems 
+				WHERE UserId = @UserId 
+					AND ProductId = @ProductId 
+					AND Active = 1
+					AND (@TenantId IS NULL OR TenantId = @TenantId);
+				
+				-- Calculate new quantity
+				SET @NewQuantity = @ExistingQuantity + @Quantity;
+				
+				-- Check stock availability
+				IF @NewQuantity > @AvailableStock
+				BEGIN
+					RAISERROR('Insufficient stock. Available quantity: %d, Requested quantity: %d.', 16, 1, @AvailableStock, @NewQuantity);
+					RETURN;
+				END
+				
+				IF @ExistingCartId IS NOT NULL
+				BEGIN
+					-- Update existing cart item
+					UPDATE CartItems
+					SET 
+						Quantity = @NewQuantity,
+						UpdatedDate = @CurrentTime,
+						SessionId = ISNULL(@SessionId, SessionId)
+					WHERE CartId = @ExistingCartId;
+					
+					-- Log the cart update activity
+					INSERT INTO UserActivityLog (
+						UserId,
+						ActivityType,
+						ActivityDescription,
+						IpAddress,
+						UserAgent,
+						CreatedAt
+					) VALUES (
+						@UserId,
+						'CART_UPDATE',
+						'Updated cart item: ' + @ProductName + ' (Quantity: ' + CAST(@NewQuantity AS VARCHAR(10)) + ')',
+						@IpAddress,
+						@UserAgent,
+						@CurrentTime
+					);
+					
+					-- Return updated cart item info
+					SELECT 
+						@ExistingCartId AS CartId,
+						@UserId AS UserId,
+						@ProductId AS ProductId,
+						@ProductName AS ProductName,
+						@NewQuantity AS Quantity,
+						@ProductPrice AS Price,
+						(@NewQuantity * @ProductPrice) AS ItemTotal,
+						'Product quantity updated in cart' AS Message,
+						@CurrentTime AS UpdatedDate;
+				END
+				ELSE
+				BEGIN
+					-- Insert new cart item
+					INSERT INTO CartItems (
+						UserId,
+						ProductId,
+						Quantity,
+						TenantId,
+						SessionId,
+						Active,
+						AddedDate,
+						UpdatedDate
+					) VALUES (
+						@UserId,
+						@ProductId,
+						@Quantity,
+						@TenantId,
+						@SessionId,
+						1,
+						@CurrentTime,
+						@CurrentTime
+					);
+					
+					SET @ExistingCartId = SCOPE_IDENTITY();
+					
+					-- Log the cart addition activity
+					INSERT INTO UserActivityLog (
+						UserId,
+						ActivityType,
+						ActivityDescription,
+						IpAddress,
+						UserAgent,
+						CreatedAt
+					) VALUES (
+						@UserId,
+						'CART_ADD',
+						'Added to cart: ' + @ProductName + ' (Quantity: ' + CAST(@Quantity AS VARCHAR(10)) + ')',
+						@IpAddress,
+						@UserAgent,
+						@CurrentTime
+					);
+					
+					-- Return new cart item info
+					SELECT 
+						@ExistingCartId AS CartId,
+						@UserId AS UserId,
+						@ProductId AS ProductId,
+						@ProductName AS ProductName,
+						@Quantity AS Quantity,
+						@ProductPrice AS Price,
+						(@Quantity * @ProductPrice) AS ItemTotal,
+						'Product added to cart successfully' AS Message,
+						@CurrentTime AS AddedDate;
+				END
+				
+				-- Optional: Clean up old inactive cart items for this user (housekeeping)
+				DELETE FROM CartItems 
+				WHERE UserId = @UserId 
+					AND Active = 0 
+					AND UpdatedDate < DATEADD(DAY, -30, @CurrentTime);
+				
+				-- Get updated cart summary
+				SELECT 
+					COUNT(*) AS TotalUniqueItems,
+					SUM(p.Quantity) AS TotalQuantity,
+					SUM(ci.Quantity * p.Price) AS TotalAmount
+				FROM CartItems ci
+				INNER JOIN Products p ON ci.ProductId = p.ProductId
+				WHERE ci.UserId = @UserId 
+					AND ci.Active = 1
+					AND p.Active = 1
+					AND (@TenantId IS NULL OR ci.TenantId = @TenantId);
+				
+				COMMIT TRANSACTION;
+				
+			END TRY
+			BEGIN CATCH
+				IF @@TRANCOUNT > 0
+					ROLLBACK TRANSACTION;
+					
+				DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+				DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+				DECLARE @ErrorState INT = ERROR_STATE();
+				
+				-- Log the failed cart operation
+				IF @UserId IS NOT NULL
+				BEGIN
+					INSERT INTO UserActivityLog (
+						UserId,
+						ActivityType,
+						ActivityDescription,
+						IpAddress,
+						UserAgent,
+						CreatedAt
+					) VALUES (
+						@UserId,
+						'CART_ADD_FAILED',
+						'Failed to add item to cart: ' + @ErrorMessage,
+						@IpAddress,
+						@UserAgent,
+						GETUTCDATE()
+					);
+				END
+				
+				RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+			END CATCH
+		END

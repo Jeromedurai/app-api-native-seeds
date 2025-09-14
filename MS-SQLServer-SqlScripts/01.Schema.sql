@@ -1,7 +1,4 @@
--- ====================================== 
--- COMPREHENSIVE E-COMMERCE DATABASE SCHEMA
--- Optimized for Performance and Scalability
--- ====================================== 
+USE [DB_HIMALAYA]
 
 -- Drop existing tables in correct order (foreign key dependencies)
 IF OBJECT_ID('UserCustomPermissions', 'U') IS NOT NULL DROP TABLE UserCustomPermissions;
@@ -102,8 +99,6 @@ CREATE TABLE Users (
 	AgreeToTerms BIT DEFAULT 0 NOT NULL,
 	TermsAcceptedAt DATETIME2(7) NULL,
 	CONSTRAINT PK_Users PRIMARY KEY CLUSTERED (UserId),
-	CONSTRAINT UQ_Users_Email UNIQUE (Email),
-	CONSTRAINT UQ_Users_Phone UNIQUE (Phone),
 	CONSTRAINT CK_Users_LoginAttempts CHECK (LoginAttempts >= 0 AND LoginAttempts <= 10)
 );
 
@@ -120,8 +115,7 @@ CREATE TABLE Roles (
 	CreatedBy BIGINT NULL,
 	UpdatedBy BIGINT NULL,
 	CONSTRAINT PK_Roles PRIMARY KEY CLUSTERED (RoleId),
-	CONSTRAINT UQ_Roles_RoleName UNIQUE (RoleName),
-	CONSTRAINT CK_Roles_RoleLevel CHECK (RoleLevel >= 1 AND RoleLevel <= 10)
+	CONSTRAINT UQ_Roles_RoleName UNIQUE (RoleName)
 );
 
 -- Permissions Table - System permissions
@@ -150,11 +144,7 @@ CREATE TABLE UserRoles (
 	Active BIT DEFAULT 1 NOT NULL,
 	CreatedAt DATETIME2(7) DEFAULT GETUTCDATE() NOT NULL,
 	UpdatedAt DATETIME2(7) DEFAULT GETUTCDATE() NOT NULL,
-	CONSTRAINT PK_UserRoles PRIMARY KEY CLUSTERED (UserRoleId),
-	CONSTRAINT FK_UserRoles_Users FOREIGN KEY (UserId) REFERENCES Users(UserId),
-	CONSTRAINT FK_UserRoles_Roles FOREIGN KEY (RoleId) REFERENCES Roles(RoleId),
-	CONSTRAINT FK_UserRoles_AssignedBy FOREIGN KEY (AssignedBy) REFERENCES Users(UserId),
-	CONSTRAINT UQ_UserRoles_UserRole UNIQUE (UserId, RoleId, Active)
+	CONSTRAINT PK_UserRoles PRIMARY KEY CLUSTERED (UserRoleId)
 );
 
 -- Role Permissions Junction Table

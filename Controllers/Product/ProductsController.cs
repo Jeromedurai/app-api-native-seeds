@@ -262,34 +262,7 @@ namespace Tenant.Query.Controllers.Product
 
         #endregion
 
-        #region Crude endpoint
-        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
-        [AllowAnonymous]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found", typeof(ApiResult))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
-        [HttpPost]
-        [Route("tenants/{tenantId:long}/add-product")]
-        public async Task<IActionResult> AddProduct([FromRoute] long tenantId, 
-            [FromBody] Model.Product.Product product)
-        {
-            try
-            {
-                var result = await this.Service.AddProduct(tenantId, product);
-                return StatusCode(StatusCodes.Status200OK, new ApiResult() { Data = result });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new ApiResult { Exception = ex.Message });
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult { Exception = ex.Message });
-            }
-            finally
-            {
-            }
-        }
-
+        #region Crude endpoint        
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
@@ -347,6 +320,7 @@ namespace Tenant.Query.Controllers.Product
         [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpGet]
+        [AllowAnonymous]
         [Route("tenants/{userId:long}/get-user-cart")]
         public IActionResult GeUserCart(long userId)
         {
@@ -507,11 +481,10 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="request">Product details</param>
         /// <returns>Product ID</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
-        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpPost]
-        [Route("tenants/{tenantId:long}")]
+        [Route("tenants/{tenantId:long}/add-product")]
         public async Task<IActionResult> AddProduct([FromRoute] long tenantId, [FromBody] AddProductRequest request)
         {
             try
@@ -546,6 +519,7 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="request">Product details</param>
         /// <returns>Success message</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Product not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
@@ -589,6 +563,7 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="productId">Product ID</param>
         /// <returns>Success message</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Product not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpDelete]
@@ -938,6 +913,7 @@ namespace Tenant.Query.Controllers.Product
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpPost]
+        [AllowAnonymous]
         [Route("cart")]
         public async Task<IActionResult> GetCart([FromBody] Model.ProductCart.GetCartRequest request)
         {
@@ -981,6 +957,7 @@ namespace Tenant.Query.Controllers.Product
         /// <returns>Cart item details and summary</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Product or user not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Insufficient stock", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
@@ -1043,6 +1020,7 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="request">Remove from cart request details</param>
         /// <returns>Removal confirmation and updated cart summary</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
+        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Product not found in cart", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
@@ -1103,6 +1081,7 @@ namespace Tenant.Query.Controllers.Product
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found or cart is empty", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
+        [AllowAnonymous]
         [HttpDelete]
         [Route("cart/clear")]
         public async Task<IActionResult> ClearCart([FromBody] Model.ProductCart.ClearCartRequest request)
