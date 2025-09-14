@@ -211,7 +211,7 @@ namespace Tenant.Query.Service.User
         /// <param name="userId">User ID</param>
         /// <param name="tenantId">Optional tenant ID for validation</param>
         /// <returns>User profile response</returns>
-        public async Task<Model.User.UserProfileResponse> GetUserProfile(long userId, long? tenantId = null)
+        public async Task<Model.User.UserProfileData> GetUserProfile(long userId, long? tenantId = null)
         {
             try
             {
@@ -223,14 +223,9 @@ namespace Tenant.Query.Service.User
                 // Call repository to get user profile
                 var profileData = await this.UserRepository.GetUserProfile(userId, tenantId);
 
-                var response = new Model.User.UserProfileResponse
-                {
-                    Data = profileData,
-                };
-
                 this.Logger.LogInformation($"Profile retrieval successful for user: {userId}");
 
-                return response;
+                return profileData;
             }
             catch (KeyNotFoundException)
             {

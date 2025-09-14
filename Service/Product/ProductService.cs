@@ -1002,7 +1002,7 @@ namespace Tenant.Query.Service.Product
             }
             catch (Exception ex)
             {
-                throw new Exception("An error occurred while adding the product.", ex);
+                throw new Exception(ex.Message);
             }
         }
 

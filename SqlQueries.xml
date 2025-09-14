@@ -2543,7 +2543,8 @@
 			END
 		]]>
 	</query>
-	<query Id="SP_USER_LOGOUT">
+	<query Id="
+		   ">
 		<![CDATA[
 			CREATE PROCEDURE [dbo].[SP_USER_LOGOUT]
 				@UserId BIGINT,

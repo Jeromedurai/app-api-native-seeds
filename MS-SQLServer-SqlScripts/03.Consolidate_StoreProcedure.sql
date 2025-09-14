@@ -47,10 +47,6 @@ IF OBJECT_ID(N'[dbo].[SP_USER_LOGIN]', N'P') IS NOT NULL
     DROP PROCEDURE [dbo].[SP_USER_LOGIN];
 GO
 
-IF OBJECT_ID(N'[dbo].[SP_USER_LOGOUT]', N'P') IS NOT NULL
-    DROP PROCEDURE [dbo].[SP_USER_LOGOUT];
-GO
-
 IF OBJECT_ID(N'[dbo].[SP_USER_REGISTER]', N'P') IS NOT NULL
     DROP PROCEDURE [dbo].[SP_USER_REGISTER];
 GO
@@ -338,8 +334,6 @@ GO
 
 CREATE PROCEDURE [dbo].[SP_USER_LOGOUT]
 	@UserId BIGINT,
-	@Token NVARCHAR(MAX) = NULL,
-	@RefreshToken NVARCHAR(MAX) = NULL,
 	@DeviceId NVARCHAR(255) = NULL,
 	@LogoutFromAllDevices BIT = 0
 AS
@@ -359,52 +353,20 @@ BEGIN
 		-- If logout from all devices is requested
 		IF @LogoutFromAllDevices = 1
 		BEGIN
-			-- Invalidate all tokens for this user
-			UPDATE UserTokens 
-			SET IsRevoked = 1, 
-				RevokedAt = GETUTCDATE(),
-				RevokedReason = 'Logout from all devices'
-			WHERE UserId = @UserId 
-				AND IsRevoked = 0;
-			
 			-- Clear remember me sessions
 			UPDATE Users 
 			SET RememberMeToken = NULL,
 				RememberMeExpiry = NULL,
-				LastLogout = GETUTCDATE()
+				LastLogout = GETUTCDATE(),
+				LastLogin = NULL
 			WHERE UserId = @UserId;
 		END
 		ELSE
 		BEGIN
-			-- Logout from specific device/token
-			IF @Token IS NOT NULL
-			BEGIN
-				-- Invalidate specific token
-				UPDATE UserTokens 
-				SET IsRevoked = 1, 
-					RevokedAt = GETUTCDATE(),
-					RevokedReason = 'User logout'
-			
-				WHERE UserId = @UserId 
-					AND (Token = @Token OR RefreshToken = @RefreshToken)
-					AND IsRevoked = 0;
-			END
-			
-			IF @DeviceId IS NOT NULL
-			BEGIN
-				-- Invalidate tokens for specific device
-				UPDATE UserTokens 
-				SET IsRevoked = 1, 
-					RevokedAt = GETUTCDATE(),
-					RevokedReason = 'Device logout'
-				WHERE UserId = @UserId 
-					AND DeviceId = @DeviceId
-					AND IsRevoked = 0;
-			END
-			
 			-- Update last logout time
 			UPDATE Users 
-			SET LastLogout = GETUTCDATE()
+			SET LastLogout = GETUTCDATE(),
+			LastLogin = NULL
 			WHERE UserId = @UserId;
 		END
 		
@@ -686,7 +648,7 @@ BEGIN
 			BEGIN
 				-- Unlock account
 				UPDATE Users 
-				SET AccountLocked = 0, LoginAttempts = 0 
+				SET AccountLocked = 0, LoginAttempts = 0, LastLogout=NULL
 				WHERE UserId = @UserId;
 				SET @AccountLocked = 0;
 				SET @LoginAttempts = 0;
@@ -729,6 +691,7 @@ BEGIN
 		SET LoginAttempts = 0, 
 			LastLogin = GETUTCDATE(),
 			LastLoginAttempt = GETUTCDATE(),
+			LastLogout=NULL,
 			AccountLocked = 0
 		WHERE UserId = @UserId;
 		

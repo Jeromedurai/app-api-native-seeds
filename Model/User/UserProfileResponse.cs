@@ -4,17 +4,6 @@ using System.Collections.Generic;
 namespace Tenant.Query.Model.User
 {
     /// <summary>
-    /// Model for user profile response
-    /// </summary>
-    public class UserProfileResponse
-    {
-        /// <summary>
-        /// User profile data
-        /// </summary>
-        public UserProfileData Data { get; set; }
-    }
-
-    /// <summary>
     /// Model for user profile data
     /// </summary>
     public class UserProfileData

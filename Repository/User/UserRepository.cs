@@ -300,8 +300,6 @@ namespace Tenant.Query.Repository.User
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_USER_LOGOUT,
                     request.UserId,
-                    request.Token ?? (object)DBNull.Value,
-                    request.RefreshToken ?? (object)DBNull.Value,
                     request.DeviceId ?? (object)DBNull.Value,
                     request.LogoutFromAllDevices
                 ));

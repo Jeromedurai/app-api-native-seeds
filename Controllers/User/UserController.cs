@@ -179,7 +179,6 @@ namespace Tenant.Query.Controllers
         /// <returns>Logout confirmation</returns>
         [HttpPost]
         [Route("auth/logout")]
-        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
@@ -238,8 +237,7 @@ namespace Tenant.Query.Controllers
         /// <returns>User profile data</returns>
         [HttpGet]
         [Route("auth/profile")]
-        [AllowAnonymous]
-        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(Model.User.UserProfileResponse))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(Model.User.UserProfileData))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
@@ -257,27 +255,15 @@ namespace Tenant.Query.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                var errorResponse = new Model.User.UserProfileResponse
-                {
-                    Data = null,
-                };
-                return NotFound(errorResponse);
+                return NotFound(new ApiResult { Exception = ex.Message });
             }
             catch (ArgumentException ex)
             {
-                var errorResponse = new Model.User.UserProfileResponse
-                {
-                    Data = null,
-                };
-                return BadRequest(errorResponse);
+                return BadRequest(new ApiResult { Exception = ex.Message });
             }
             catch (System.Exception ex)
             {
-                var errorResponse = new Model.User.UserProfileResponse
-                {
-                    Data = null,
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult { Exception = ex.Message });
             }
         }
 
@@ -288,7 +274,6 @@ namespace Tenant.Query.Controllers
         /// <returns>Success confirmation</returns>
         [HttpPost]
         [Route("auth/update-profile")]
-        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ApiResult))]

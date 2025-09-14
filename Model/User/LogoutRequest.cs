@@ -14,16 +14,6 @@ namespace Tenant.Query.Model.User
         public long UserId { get; set; }
 
         /// <summary>
-        /// Current authentication token (optional)
-        /// </summary>
-        public string Token { get; set; }
-
-        /// <summary>
-        /// Current refresh token (optional)
-        /// </summary>
-        public string RefreshToken { get; set; }
-
-        /// <summary>
         /// Device ID for device-specific logout (optional)
         /// </summary>
         [StringLength(255, ErrorMessage = "Device ID cannot exceed 255 characters")]
