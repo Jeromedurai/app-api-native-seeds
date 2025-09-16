@@ -722,7 +722,7 @@ namespace Tenant.Query.Repository.Product
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -805,7 +805,7 @@ namespace Tenant.Query.Repository.Product
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 

@@ -25,7 +25,6 @@
 
         }
 
-
         public static class StoredProcedures
         {
             public const string SA_REALTIMEOCR_ADD_INVOICE = "[dbo].[SA_REALTIMEOCR_ADD_INVOICE_TESTED]";

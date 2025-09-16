@@ -563,7 +563,6 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="productId">Product ID</param>
         /// <returns>Success message</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
-        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Product not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpDelete]
@@ -597,7 +596,6 @@ namespace Tenant.Query.Controllers.Product
         /// <returns>List of categories</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
-        [AllowAnonymous]
         [HttpGet]
         [Route("categories")]
         public IActionResult GetAllCategories([FromQuery] long? tenantId = null)
@@ -623,8 +621,8 @@ namespace Tenant.Query.Controllers.Product
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpPost]
-        [Route("categories")]
-        public async Task<IActionResult> AddCategory([FromQuery] long tenantId, [FromBody] AddCategoryRequest request)
+        [Route("tenantId/{tenantId:long}/add-category")]
+        public async Task<IActionResult> AddCategory([FromRoute] long tenantId, [FromBody] AddCategoryRequest request)
         {
             try
             {
@@ -663,8 +661,9 @@ namespace Tenant.Query.Controllers.Product
         [SwaggerResponse(StatusCodes.Status404NotFound, "Category not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpPut]
-        [Route("categories/{categoryId:long}")]
-        public async Task<IActionResult> UpdateCategory([FromRoute] long categoryId, [FromQuery] long tenantId, [FromBody] UpdateCategoryRequest request)
+        [Route("tenantId/{tenantId:long}/update-category/{categoryId:long}")]
+        public async Task<IActionResult> UpdateCategory([FromRoute] long categoryId, [FromRoute] long tenantId,
+            [FromBody] UpdateCategoryRequest request)
         {
             try
             {
