@@ -17,6 +17,7 @@ using SixLabors.ImageSharp;
 using Tenant.Query.Model.WishList;
 using Tenant.Query.Model.ProductCart;
 using Tenant.Query.Model.Constant;
+using Tenant.API.Base.Model.Validation;
 
 namespace Tenant.Query.Repository.Product
 {
@@ -1302,7 +1303,7 @@ namespace Tenant.Query.Repository.Product
         /// </summary>  
         /// <param name="request">Add to cart request</param>
         /// <returns>Cart item details and summary</returns>
-        public async Task<Model.ProductCart.AddToCartResponse> AddItemToCart(Model.ProductCart.AddToCartRequest request)
+        public async Task<Model.ProductCart.AddToCartResponse> AddItemToCart(long tenantId, Model.ProductCart.AddToCartRequest request)
         {
             try
             {
@@ -1313,7 +1314,7 @@ namespace Tenant.Query.Repository.Product
                     request.UserId,
                     request.ProductId,
                     request.Quantity,
-                    request.TenantId ?? (object)DBNull.Value,
+                    tenantId.ToString() ?? (object)DBNull.Value,
                     request.SessionId ?? (object)DBNull.Value,
                     request.IpAddress ?? (object)DBNull.Value,
                     request.UserAgent ?? (object)DBNull.Value
@@ -1388,7 +1389,7 @@ namespace Tenant.Query.Repository.Product
         /// </summary>
         /// <param name="request">Remove from cart request</param>
         /// <returns>Removal confirmation and updated cart summary</returns>
-        public async Task<Model.ProductCart.RemoveFromCartResponse> RemoveItemFromCart(Model.ProductCart.RemoveFromCartRequest request)
+        public async Task<Model.ProductCart.RemoveFromCartResponse> RemoveItemFromCart(long tenantId, Model.ProductCart.RemoveFromCartRequest request)
         {
             try
             {
@@ -1398,7 +1399,7 @@ namespace Tenant.Query.Repository.Product
                     Model.Constant.Constant.StoredProcedures.SP_REMOVE_ITEM_FROM_CART,
                     request.UserId,
                     request.ProductId,
-                    request.TenantId ?? (object)DBNull.Value,
+                    tenantId.ToString() ?? (object)DBNull.Value,
                     request.RemoveCompletely,
                     request.IpAddress ?? (object)DBNull.Value,
                     request.UserAgent ?? (object)DBNull.Value
@@ -1482,7 +1483,7 @@ namespace Tenant.Query.Repository.Product
         /// </summary>
         /// <param name="request">Clear cart request</param>
         /// <returns>Cart clearing confirmation and statistics</returns>
-        public async Task<Model.ProductCart.ClearCartResponse> ClearCart(Model.ProductCart.ClearCartRequest request)
+        public async Task<Model.ProductCart.ClearCartResponse> ClearCart(long tenantId, Model.ProductCart.ClearCartRequest request)
         {
             try
             {
@@ -1491,7 +1492,7 @@ namespace Tenant.Query.Repository.Product
                 var result = await Task.Run(() => _dataAccess.ExecuteDataset(
                     Model.Constant.Constant.StoredProcedures.SP_CLEAR_CART,
                     request.UserId,
-                    request.TenantId ?? (object)DBNull.Value,
+                    tenantId.ToString() ?? (object)DBNull.Value,
                     request.ClearCompletely,
                     request.IpAddress ?? (object)DBNull.Value,
                     request.UserAgent ?? (object)DBNull.Value

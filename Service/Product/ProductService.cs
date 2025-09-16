@@ -1205,7 +1205,7 @@ namespace Tenant.Query.Service.Product
         /// </summary>
         /// <param name="request">Add to cart request</param>
         /// <returns>Cart item details and summary</returns>
-        public async Task<Model.ProductCart.AddToCartResponse> AddItemToCart(Model.ProductCart.AddToCartRequest request)
+        public async Task<Model.ProductCart.AddToCartResponse> AddItemToCart(long tenantId, Model.ProductCart.AddToCartRequest request)
         {
             try
             {
@@ -1223,7 +1223,7 @@ namespace Tenant.Query.Service.Product
                 if (request.Quantity <= 0)
                     throw new ArgumentException("Quantity must be greater than 0");
 
-                var cartResponse = await this.productRepository.AddItemToCart(request);
+                var cartResponse = await this.productRepository.AddItemToCart(tenantId, request);
 
                 this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Add to cart successful for user: {request.UserId}, product: {request.ProductId}");
 
@@ -1251,7 +1251,7 @@ namespace Tenant.Query.Service.Product
         /// </summary>
         /// <param name="request">Remove from cart request</param>
         /// <returns>Removal confirmation and updated cart summary</returns>
-        public async Task<Model.ProductCart.RemoveFromCartResponse> RemoveItemFromCart(Model.ProductCart.RemoveFromCartRequest request)
+        public async Task<Model.ProductCart.RemoveFromCartResponse> RemoveItemFromCart(long tenantId, Model.ProductCart.RemoveFromCartRequest request)
         {
             try
             {
@@ -1266,7 +1266,7 @@ namespace Tenant.Query.Service.Product
                 if (request.ProductId <= 0)
                     throw new ArgumentException("Valid Product ID is required");
 
-                var removeResponse = await this.productRepository.RemoveItemFromCart(request);
+                var removeResponse = await this.productRepository.RemoveItemFromCart(tenantId, request);
 
                 this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Remove from cart successful for user: {request.UserId}, product: {request.ProductId}");
 
@@ -1289,7 +1289,7 @@ namespace Tenant.Query.Service.Product
         /// </summary>
         /// <param name="request">Clear cart request</param>
         /// <returns>Cart clearing confirmation and statistics</returns>
-        public async Task<Model.ProductCart.ClearCartResponse> ClearCart(Model.ProductCart.ClearCartRequest request)
+        public async Task<Model.ProductCart.ClearCartResponse> ClearCart(long tenantId, Model.ProductCart.ClearCartRequest request)
         {
             try
             {
@@ -1301,7 +1301,7 @@ namespace Tenant.Query.Service.Product
                 if (request.UserId <= 0)
                     throw new ArgumentException("Valid User ID is required");
 
-                var clearResponse = await this.productRepository.ClearCart(request);
+                var clearResponse = await this.productRepository.ClearCart(tenantId, request);
 
                 this._loggerFactory.CreateLogger<ProductService>().LogInformation($"Clear cart successful for user: {request.UserId} - {clearResponse.ClearedItemCount} items cleared");
 

@@ -955,14 +955,13 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="request">Add to cart request details</param>
         /// <returns>Cart item details and summary</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
-        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]        
         [SwaggerResponse(StatusCodes.Status404NotFound, "Product or user not found", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Insufficient stock", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpPost]
-        [Route("add-item-to-cart")]
-        public async Task<IActionResult> AddItemToCart([FromBody] Model.ProductCart.AddToCartRequest request)
+        [Route("tenantId/{tenantId:long}/add-cart")]
+        public async Task<IActionResult> AddItemToCart([FromRoute] long tenantId, [FromBody] Model.ProductCart.AddToCartRequest request)
         {
             try
             {
@@ -991,7 +990,7 @@ namespace Tenant.Query.Controllers.Product
                     request.UserAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
                 }
 
-                var result = await this.Service.AddItemToCart(request);
+                var result = await this.Service.AddItemToCart(tenantId,request);
                 return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = result });
             }
             catch (KeyNotFoundException ex)
@@ -1019,13 +1018,12 @@ namespace Tenant.Query.Controllers.Product
         /// <param name="request">Remove from cart request details</param>
         /// <returns>Removal confirmation and updated cart summary</returns>
         [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(ApiResult))]
-        [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Product not found in cart", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
         [HttpDelete]
-        [Route("cart/remove")]
-        public async Task<IActionResult> RemoveItemFromCart([FromBody] Model.ProductCart.RemoveFromCartRequest request)
+        [Route("tenantId/{tenantId:long}/cart/remove-item")]
+        public async Task<IActionResult> RemoveItemFromCart([FromRoute] long tenantId, [FromBody] Model.ProductCart.RemoveFromCartRequest request)
         {
             try
             {
@@ -1054,7 +1052,7 @@ namespace Tenant.Query.Controllers.Product
                     request.UserAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
                 }
 
-                var result = await this.Service.RemoveItemFromCart(request);
+                var result = await this.Service.RemoveItemFromCart(tenantId, request);
                 return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = result });
             }
             catch (KeyNotFoundException ex)
@@ -1080,10 +1078,9 @@ namespace Tenant.Query.Controllers.Product
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad Request", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "User not found or cart is empty", typeof(ApiResult))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", typeof(ApiResult))]
-        [AllowAnonymous]
         [HttpDelete]
-        [Route("cart/clear")]
-        public async Task<IActionResult> ClearCart([FromBody] Model.ProductCart.ClearCartRequest request)
+        [Route("tenantId/{tenantId:long}/cart/clear")]
+        public async Task<IActionResult> ClearCart([FromRoute] long tenantId, [FromBody] Model.ProductCart.ClearCartRequest request)
         {
             try
             {
@@ -1112,7 +1109,7 @@ namespace Tenant.Query.Controllers.Product
                     request.UserAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
                 }
 
-                var result = await this.Service.ClearCart(request);
+                var result = await this.Service.ClearCart(tenantId, request);
                 return StatusCode(StatusCodes.Status200OK, new ApiResult { Data = result });
             }
             catch (KeyNotFoundException ex)
@@ -1705,7 +1702,8 @@ namespace Tenant.Query.Controllers.Product
         [Route("products/{productId:long}/images")]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = MaxFileSize * 10)] // Allow multiple files
-        public async Task<IActionResult> AddProductImages([FromRoute] long productId, [FromForm] Model.Product.AddProductImagesRequest request)
+        public async Task<IActionResult> AddProductImages([FromRoute] long productId, 
+            [FromForm] Model.Product.AddProductImagesRequest request)
         {
             try
             {
